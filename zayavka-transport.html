@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заявка на подбор транспорта — ВТК Восток</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#191817; --ink2:#3D3A36; --ink3:#716C64;
+    --line:#D6D1C6; --line-soft:#E9E5DB; --line-strong:#C9C3B6;
+    --paper:#FFFFFF; --bg:#EFEDE7;
+    --accent:#C4552E; --accent-soft:#FBEDE7;
+    --err:#C6262E; --err-bg:#FCF1F0;
+    --ok:#5F8465;
+    --draft-bg:#E3EFF7; --draft-line:#C2DBEA;
+    --ready-bg:#E7F0E0; --ready-line:#CDDCC1;
+    --card-bg:rgba(255,255,255,.74);
+    --r-block:10px; --r-card:8px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'IBM Plex Sans',sans-serif; font-size:15px; line-height:1.5;
+    color:var(--ink); background:var(--bg); border-top:4px solid var(--accent);
+  }
+  .mono{font-family:'IBM Plex Mono',monospace}
+  .dim{color:var(--ink3)}
+
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(239,237,231,.94); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .tb-inner{max-width:900px; margin:0 auto; padding:8px 20px; display:flex; align-items:center; gap:16px}
+  .brand{font:600 15px 'Oswald'; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap}
+  .brand span{font:400 11.5px 'IBM Plex Mono'; letter-spacing:0; text-transform:none; color:var(--ink3)}
+  .tb-submit{margin-left:auto}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:9px; cursor:pointer;
+    font:500 13.5px 'Oswald'; text-transform:uppercase; letter-spacing:.07em;
+    padding:10px 18px; border-radius:6px; border:1.5px solid var(--ink);
+    background:var(--ink); color:#fff; transition:background .15s, color .15s, border-color .15s, transform .1s;
+  }
+  .btn:hover{background:var(--accent); border-color:var(--accent)}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.55; cursor:default; transform:none}
+  .btn.ghost{background:transparent; color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+  .btn.sm{padding:6px 13px; font-size:12.5px}
+  .btn.lg{padding:12px 24px; font-size:14.5px}
+  .spin{width:14px; height:14px; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite}
+  @keyframes rot{to{transform:rotate(360deg)}}
+
+  .wrap{max-width:900px; margin:0 auto; padding:22px 16px 70px}
+  .sheet{
+    background:var(--draft-bg); border:1px solid var(--draft-line); border-radius:var(--r-block);
+    transition:background-color .9s ease, border-color .9s ease;
+    box-shadow:0 24px 50px -28px rgba(25,24,23,.28), 0 2px 8px rgba(25,24,23,.05);
+  }
+  .sheet.ready{background:var(--ready-bg); border-color:var(--ready-line)}
+  .sheet-head{
+    padding:18px 26px 12px;
+    display:flex; gap:20px; justify-content:space-between; flex-wrap:wrap;
+  }
+  .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-bottom:6px}
+  h1{font:600 clamp(24px,4vw,34px)/1.1 'Oswald'; text-transform:uppercase; letter-spacing:.015em}
+  .sh-line{margin-top:10px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; font-size:12.5px}
+  .uline{
+    border:none; border-bottom:1.5px solid var(--ink); background:transparent;
+    font:500 15px 'IBM Plex Sans'; color:var(--ink); padding:3px 2px; width:min(280px,100%);
+  }
+  .uline:focus{outline:none; border-color:var(--accent)}
+  .sh-num{font-size:12.5px; text-align:right; line-height:1.8; border:1.5px solid var(--ink); border-radius:6px; padding:8px 13px; align-self:flex-start; background:rgba(255,255,255,.5)}
+  .sh-num b{font-weight:500}
+
+  .sec{
+    background:var(--card-bg);
+    border:1px solid var(--line-strong); border-radius:var(--r-block);
+    margin:0 16px 12px; padding:14px 20px 16px;
+    box-shadow:0 1px 3px rgba(25,24,23,.05);
+  }
+  .sec-thin{padding:10px 20px}
+  .sec-head{display:flex; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap}
+  .sec-num{font:500 12px 'IBM Plex Mono'; color:var(--accent); border:1.5px solid currentColor; border-radius:4px; padding:1px 7px; letter-spacing:.1em; background:#fff}
+  .sec-head h2{font:600 17px 'Oswald'; text-transform:uppercase; letter-spacing:.05em}
+
+  details.sec{padding:0}
+  details.sec summary{
+    list-style:none; cursor:pointer; user-select:none;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:12px 20px; transition:background .15s; border-radius:var(--r-block);
+  }
+  details.sec summary::-webkit-details-marker{display:none}
+  details.sec summary:hover{background:rgba(25,24,23,.035)}
+  details.sec summary h2{font:600 15px 'Oswald'; text-transform:uppercase; letter-spacing:.05em}
+  details.sec[open] summary{border-bottom:1px dashed rgba(25,24,23,.18); border-radius:var(--r-block) var(--r-block) 0 0}
+  .chev{flex:none; color:var(--ink3); transition:transform .25s}
+  details.sec[open] .chev{transform:rotate(90deg)}
+  summary .opt-note{flex-basis:100%; font-size:12px; color:var(--ink3); margin-left:24px}
+  .sec-body{padding:12px 20px 16px}
+
+  .row{display:grid; grid-template-columns:repeat(12,1fr); gap:11px 14px}
+  .c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
+
+  .fld label{
+    display:block; font-size:11px; font-weight:500; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink3); margin-bottom:5px;
+    white-space:nowrap;
+  }
+  .req-star{color:var(--err); font-weight:600}
+  .control{
+    width:100%; border:1.5px solid var(--line); border-radius:4px; background:#fff;
+    padding:0 10px; font:400 15px 'IBM Plex Sans'; color:var(--ink);
+    height:36px; line-height:1.4;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  textarea.control{height:auto; min-height:52px; padding:6px 10px; resize:vertical; line-height:1.45}
+  .control::placeholder{color:#B6B1A6}
+  .control:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(196,85,46,.13)}
+  select.control{
+    appearance:none; -webkit-appearance:none; cursor:pointer; padding-right:34px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23191817' stroke-width='1.8'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 11px center;
+  }
+  select.control.empty{color:#B6B1A6}
+  .err-msg{display:none; font-size:12px; color:var(--err); margin-top:4px}
+  .fld.invalid .control{border-color:var(--err); background:var(--err-bg)}
+  .fld.invalid label{color:var(--err)}
+  .fld.invalid .err-msg{display:block}
+
+  @keyframes blinkErr{
+    0%,100%{background:#fff; border-color:var(--line)}
+    50%{background:var(--err-bg); border-color:var(--err)}
+  }
+  .fld.blink .control{animation:blinkErr .45s ease 3}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-4px)}
+    75%{transform:translateX(4px)}
+  }
+  .fld.shake{animation:shake .3s ease}
+
+  /* ── умные окошки времени ───────────────────── */
+  .hours{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .hours .control{
+    width:64px; padding:0 3px; height:36px; cursor:text;
+    font:400 13px 'IBM Plex Mono'; text-align:center;
+  }
+  .h-lab{font-size:12px; color:var(--ink3); user-select:none}
+  .hours .control.empty-req{border-color:var(--err); background:var(--err-bg)}
+  .hours .control.blink-one{animation:blinkErr .45s ease 3}
+
+  /* ── габариты: три окошка в одну строку ─────── */
+  .dims{display:flex; align-items:center; gap:4px; flex-wrap:nowrap; white-space:nowrap}
+  .dims .control{
+    width:66px; min-width:0; padding:0 2px; height:36px; text-align:center;
+    font:400 14px 'IBM Plex Mono';
+  }
+  .dim-x{color:var(--ink3); user-select:none}
+
+  /* ── умное поле даты ────────────────────────── */
+  .date-box{font:400 14px 'IBM Plex Mono'; text-align:center; cursor:text}
+
+  /* ── поиск по ИНН ───────────────────────────── */
+  .inn-wrap{position:relative}
+  .inn-wrap .control{padding-right:44px}
+  .inn-btn{
+    position:absolute; right:4px; top:4px; bottom:4px; width:32px;
+    border:1px solid var(--line); border-radius:4px; background:#FBFAF7; color:var(--ink2);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .inn-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+  .inn-btn.loading svg{display:none}
+  .inn-btn.loading::after{content:''; width:13px; height:13px; border:2px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:rot .7s linear infinite}
+  .inn-status{font:400 11px 'IBM Plex Mono'; margin-top:4px; color:var(--ink3); min-height:14px}
+  .inn-status.ok{color:var(--ok)}
+  .inn-status.warn{color:var(--ink3)}
+  @keyframes autofillFlash{0%{background:#F4F0DC}100%{background:#fff}}
+  .autofilled{animation:autofillFlash 1.6s ease}
+
+  .parties{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .party{
+    border:1px solid var(--line-strong); border-radius:var(--r-card); padding:10px 12px 12px;
+    background:#fff; display:flex; flex-direction:column; gap:10px;
+  }
+  .mini{
+    font:600 13.5px 'Oswald'; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink); margin-bottom:1px; padding-bottom:7px; border-bottom:1px solid var(--line-soft);
+  }
+
+  .carry{display:flex; align-items:flex-end; gap:28px; flex-wrap:wrap}
+  .carry-lab{font:600 15px 'Oswald'; text-transform:uppercase; letter-spacing:.05em}
+  .epd-fld{margin-left:auto; width:min(340px,100%)}
+  .seg{display:inline-flex; border:1.5px solid var(--line); border-radius:6px; overflow:hidden; background:#fff}
+  .seg-opt{position:relative}
+  .seg-opt input{position:absolute; opacity:0; inset:0; cursor:pointer}
+  .seg-opt span{
+    display:block; padding:8px 20px; font-weight:500; color:var(--ink3);
+    border-right:1.5px solid var(--line); cursor:pointer; transition:background .15s, color .15s; user-select:none;
+  }
+  .seg-opt:last-child span{border-right:none}
+  .seg-opt span:hover{background:var(--line-soft)}
+  .seg-opt:has(input:checked) span{background:var(--ink); color:#fff}
+  .fld.invalid .seg{border-color:var(--err)}
+  .fld.invalid .seg-opt span{color:var(--err)}
+  .fld.invalid .seg-opt:has(input:checked) span{background:var(--err); color:#fff}
+
+  .drop{
+    border:1.5px dashed var(--line); border-radius:6px; background:rgba(255,255,255,.6);
+    padding:12px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:.15s;
+  }
+  .drop:hover, .drop.over{border-color:var(--accent); background:var(--accent-soft)}
+  .drop svg{flex:none; color:var(--ink3)}
+  .drop .dt{font-weight:500}
+  .drop .ds{font:400 11.5px 'IBM Plex Mono'; color:var(--ink3); margin-top:2px}
+  .file-chip{border:1.5px solid var(--ink); border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:14px; background:#fff}
+  .file-chip svg{flex:none; color:var(--accent)}
+  .file-chip .fn{font-weight:500; word-break:break-all}
+  .file-chip .fs{font:400 11.5px 'IBM Plex Mono'; color:var(--ink3); margin-top:2px}
+  .file-chip button{
+    margin-left:auto; flex:none; width:30px; height:30px; border:1.5px solid var(--line); border-radius:4px;
+    background:transparent; cursor:pointer; color:var(--ink3);
+    display:flex; align-items:center; justify-content:center; transition:.15s;
+  }
+  .file-chip button:hover{border-color:var(--err); color:var(--err); background:var(--err-bg)}
+
+  .form-foot{padding:6px 22px 16px; display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap}
+  .goz-fld{width:min(280px,100%)}
+  .igk-fld{width:min(300px,100%)}
+  #sendBtn{margin-left:auto}
+
+  .fallback{display:none; margin-top:16px; border:1.5px solid var(--err); background:var(--err-bg); border-radius:6px; padding:18px 20px; font-size:14px}
+  .fallback.show{display:block}
+  .fallback .fb-btns{display:flex; gap:12px; margin-top:12px; flex-wrap:wrap}
+
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%,16px);
+    background:var(--ink); color:#fff; padding:11px 18px; border-radius:6px;
+    font-size:14px; display:flex; align-items:center; gap:10px;
+    opacity:0; pointer-events:none; transition:.25s; z-index:120; max-width:min(90vw,480px);
+    box-shadow:0 12px 30px rgba(25,24,23,.35);
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+  .toast.err{background:var(--err)}
+
+  .done{position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; background:rgba(25,24,23,.55); backdrop-filter:blur(4px); padding:20px}
+  .done.show{display:flex}
+  .done-card{
+    background:var(--paper); width:100%; max-width:520px; padding:40px 36px; text-align:center;
+    border:1px solid #DCD7CC; border-radius:12px; box-shadow:0 40px 80px -20px rgba(0,0,0,.4);
+    animation:cardIn .35s cubic-bezier(.2,1,.3,1) both;
+  }
+  @keyframes cardIn{from{opacity:0; transform:translateY(16px) scale(.97)} to{opacity:1; transform:none}}
+  .stamp{
+    display:inline-block; margin:18px 0 22px;
+    font:600 30px 'Oswald'; text-transform:uppercase; letter-spacing:.14em; color:var(--accent);
+    border:4px solid var(--accent); border-radius:8px; padding:9px 26px;
+    animation:stampIn .5s cubic-bezier(.2,1.5,.35,1) .15s both;
+  }
+  @keyframes stampIn{
+    0%{opacity:0; transform:rotate(-7deg) scale(2.3); filter:blur(6px)}
+    60%{opacity:1; filter:blur(0)}
+    100%{transform:rotate(-7deg) scale(1); opacity:1}
+  }
+  .done-no{font:500 14.5px 'IBM Plex Mono'; margin-bottom:8px}
+  .done-tx{font-size:14px; color:var(--ink2); max-width:380px; margin:0 auto 22px}
+  .done-btns{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+
+  @media(max-width:900px){
+    .parties{grid-template-columns:1fr}
+    .epd-fld{margin-left:0; width:100%}
+    .compact{grid-column:span 6 !important}
+  }
+  @media(max-width:680px){
+    .c2,.c3,.c4,.c6,.c8,.c12,.compact{grid-column:span 12}
+    .sec{margin-left:10px; margin-right:10px; padding-left:14px; padding-right:14px}
+    .sec-body{padding-left:14px; padding-right:14px}
+    details.sec summary{padding-left:14px; padding-right:14px}
+    .sheet-head{padding-left:16px; padding-right:16px}
+    .form-foot{padding-left:14px; padding-right:14px}
+    .goz-fld,.igk-fld{width:100%}
+    #sendBtn{margin-left:0}
+    .brand span{display:none}
+    .sh-num{text-align:left}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-inner">
+    <div class="brand">ВТК&nbsp;ВОСТОК <span>· заявка на транспорт</span></div>
+    <div class="tb-submit">
+      <button type="button" class="btn sm" id="topSubmit">Отправить</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+<form id="req" novalidate autocomplete="off">
+  <div class="sheet" id="sheet">
+
+    <header class="sheet-head">
+      <div>
+        <div class="eyebrow mono">Отдел логистики · внутренняя форма</div>
+        <h1>Заявка на подбор транспорта</h1>
+        <div class="sh-line">
+          <span class="mono dim">Заявку подал(а)&nbsp;<span class="req-star">*</span></span>
+          <span class="fld" style="display:inline-block">
+            <input class="uline" name="Менеджер" autocomplete="nope" placeholder="Фамилия, имя">
+            <div class="err-msg">Укажите, кто подаёт заявку</div>
+          </span>
+        </div>
+      </div>
+      <div class="sh-num mono">
+        <div>№ <b id="reqNo">—</b></div>
+        <div class="dim">подана: <span id="reqDate">—</span></div>
+        <div class="dim">на: logist@vtkvostok.ru</div>
+      </div>
+    </header>
+
+    <!-- 00 РЕКВИЗИТЫ (свёрнуто, необязательно) -->
+    <details class="sec">
+      <summary>
+        <svg class="chev" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 2l4 4-4 4"/></svg>
+        <span class="sec-num">00</span>
+        <h2>Грузоотправитель · грузополучатель · ЛОП</h2>
+        <span class="opt-note">Не требуется, если это ООО «ВТК-Восток». По ИНН данные подставляются автоматически.</span>
+      </summary>
+      <div class="sec-body">
+        <div class="parties">
+          <div class="party">
+            <div class="mini">Грузоотправитель</div>
+            <div class="fld">
+              <label>ИНН</label>
+              <div class="inn-wrap">
+                <input class="control inn-input" name="ИНН отправителя" inputmode="numeric" maxlength="12" autocomplete="nope" placeholder="10 или 12 цифр">
+                <button type="button" class="inn-btn" data-inn="ИНН отправителя" title="Найти по ИНН">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+                </button>
+              </div>
+              <div class="inn-status mono" data-status="ИНН отправителя"></div>
+            </div>
+            <div class="fld">
+              <label>Наименование</label>
+              <input class="control" name="Грузоотправитель" autocomplete="nope" placeholder="ООО «…» / ИП …">
+            </div>
+            <div class="fld">
+              <label>Юридический адрес</label>
+              <input class="control" name="Юр. адрес отправителя" autocomplete="nope" placeholder="индекс, город, улица, дом">
+            </div>
+            <div class="fld">
+              <label>Контактное лицо</label>
+              <input class="control" name="Контактное лицо (отправитель)" autocomplete="nope" placeholder="ФИО">
+            </div>
+            <div class="fld">
+              <label>Телефон</label>
+              <input class="control" type="tel" data-tel name="Телефон (отправитель)" autocomplete="nope" placeholder="+7 (___) ___-__-__">
+            </div>
+          </div>
+
+          <div class="party">
+            <div class="mini">Грузополучатель</div>
+            <div class="fld">
+              <label>ИНН</label>
+              <div class="inn-wrap">
+                <input class="control inn-input" name="ИНН получателя" inputmode="numeric" maxlength="12" autocomplete="nope" placeholder="10 или 12 цифр">
+                <button type="button" class="inn-btn" data-inn="ИНН получателя" title="Найти по ИНН">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+                </button>
+              </div>
+              <div class="inn-status mono" data-status="ИНН получателя"></div>
+            </div>
+            <div class="fld">
+              <label>Наименование</label>
+              <input class="control" name="Грузополучатель" autocomplete="nope" placeholder="ООО «…» / ИП …">
+            </div>
+            <div class="fld">
+              <label>Юридический адрес</label>
+              <input class="control" name="Юр. адрес получателя" autocomplete="nope" placeholder="индекс, город, улица, дом">
+            </div>
+            <div class="fld">
+              <label>Контактное лицо</label>
+              <input class="control" name="Контактное лицо (получатель)" autocomplete="nope" placeholder="ФИО">
+            </div>
+            <div class="fld">
+              <label>Телефон</label>
+              <input class="control" type="tel" data-tel name="Телефон (получатель)" autocomplete="nope" placeholder="+7 (___) ___-__-__">
+            </div>
+          </div>
+
+          <div class="party">
+            <div class="mini">ЛОП</div>
+            <div class="fld">
+              <label>ИНН</label>
+              <div class="inn-wrap">
+                <input class="control inn-input" name="ИНН ЛОП" inputmode="numeric" maxlength="12" autocomplete="nope" placeholder="10 или 12 цифр">
+                <button type="button" class="inn-btn" data-inn="ИНН ЛОП" title="Найти по ИНН">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+                </button>
+              </div>
+              <div class="inn-status mono" data-status="ИНН ЛОП"></div>
+            </div>
+            <div class="fld">
+              <label>Наименование</label>
+              <input class="control" name="ЛОП" autocomplete="nope" placeholder="ООО «…» / ИП …">
+            </div>
+            <div class="fld">
+              <label>Юридический адрес</label>
+              <input class="control" name="Юр. адрес ЛОП" autocomplete="nope" placeholder="индекс, город, улица, дом">
+            </div>
+            <div class="fld">
+              <label>Контактное лицо</label>
+              <input class="control" name="Контактное лицо (ЛОП)" autocomplete="nope" placeholder="ФИО">
+            </div>
+            <div class="fld">
+              <label>Телефон</label>
+              <input class="control" type="tel" data-tel name="Телефон (ЛОП)" autocomplete="nope" placeholder="+7 (___) ___-__-__">
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 01 ГРУЗ -->
+    <section class="sec">
+      <div class="sec-head"><span class="sec-num">01</span><h2>Груз</h2></div>
+      <div class="row">
+        <div class="fld c6">
+          <label>Наименование груза <span class="req-star">*</span></label>
+          <textarea class="control" name="Наименование груза" rows="2" autocomplete="nope" placeholder="напр. Станок деревообрабатывающий, 2 шт."></textarea>
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c6">
+          <label>Как упаковано <span class="req-star">*</span></label>
+          <textarea class="control" name="Упаковка" rows="2" autocomplete="nope" placeholder="напр. 4 места на паллетах 1200×800, стрейч-плёнка"></textarea>
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c4 compact">
+          <label>Габариты, м — Д × Ш × В <span class="req-star">*</span></label>
+          <div class="dims">
+            <input class="control dim-box" name="Длина, м" data-dim inputmode="decimal" maxlength="7" autocomplete="nope" placeholder="6,00" title="Длина">
+            <span class="dim-x">×</span>
+            <input class="control dim-box" name="Ширина, м" data-dim inputmode="decimal" maxlength="7" autocomplete="nope" placeholder="2,40" title="Ширина">
+            <span class="dim-x">×</span>
+            <input class="control dim-box" name="Высота, м" data-dim inputmode="decimal" maxlength="7" autocomplete="nope" placeholder="2,50" title="Высота">
+          </div>
+          <div class="err-msg">Заполните все три размера</div>
+        </div>
+        <div class="fld c2 compact">
+          <label>Вес, т <span class="req-star">*</span></label>
+          <input class="control" name="Вес, т" data-num inputmode="decimal" autocomplete="nope" placeholder="12,5">
+          <div class="err-msg">Только цифры</div>
+        </div>
+        <div class="fld c2 compact">
+          <label>Объём, м³ <span class="req-star">*</span></label>
+          <input class="control" name="Объём, м³" data-num inputmode="decimal" autocomplete="nope" placeholder="34,0">
+          <div class="err-msg">Только цифры</div>
+        </div>
+        <div class="fld c2 compact">
+          <label>Кол-во мест <span class="req-star">*</span></label>
+          <input class="control" name="Количество мест" data-num inputmode="decimal" autocomplete="nope" placeholder="4">
+          <div class="err-msg">Только цифры</div>
+        </div>
+        <div class="fld c2 compact">
+          <label>Груз готов <span class="req-star">*</span></label>
+          <input type="text" class="control date-box" name="Груз готов" data-date inputmode="numeric" maxlength="10" autocomplete="nope" placeholder="15.05.26">
+          <div class="err-msg">Заполните дату</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 ПОГРУЗКА -->
+    <section class="sec">
+      <div class="sec-head"><span class="sec-num">02</span><h2>Погрузка</h2></div>
+      <div class="row">
+        <div class="fld c6">
+          <label>Адрес погрузки <span class="req-star">*</span></label>
+          <input class="control" name="Адрес погрузки" autocomplete="nope" placeholder="город, улица, №, склад/ворота">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c6">
+          <label>Время работы <span class="req-star">*</span></label>
+          <div class="hours">
+            <span class="h-lab">с</span>
+            <input type="text" class="control time-box" data-part="start" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">до</span>
+            <input type="text" class="control time-box" data-part="end" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">обед</span>
+            <input type="text" class="control time-box" data-part="lstart" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">—</span>
+            <input type="text" class="control time-box" data-part="lend" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+          </div>
+          <input type="hidden" class="hours-value" name="Режим работы на погрузке">
+          <div class="err-msg">Укажите время «с» и «до»</div>
+        </div>
+        <div class="fld c6">
+          <label>Способ <span class="req-star">*</span></label>
+          <select class="control empty" name="Способ погрузки">
+            <option value="" selected hidden>— выберите —</option>
+            <option>верхняя</option><option>боковая</option><option>задняя</option><option>не важно</option>
+          </select>
+          <div class="err-msg">Выберите вариант</div>
+        </div>
+        <div class="fld c3">
+          <label>Контактное лицо <span class="req-star">*</span></label>
+          <input class="control" name="Контактное лицо (погрузка)" autocomplete="nope" placeholder="ФИО">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c3">
+          <label>Телефон <span class="req-star">*</span></label>
+          <input class="control" type="tel" data-tel name="Телефон (погрузка)" autocomplete="nope" placeholder="+7 (___) ___-__-__">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 РАЗГРУЗКА -->
+    <section class="sec">
+      <div class="sec-head"><span class="sec-num">03</span><h2>Разгрузка</h2></div>
+      <div class="row">
+        <div class="fld c6">
+          <label>Адрес разгрузки <span class="req-star">*</span></label>
+          <input class="control" name="Адрес разгрузки" autocomplete="nope" placeholder="город, улица, №, склад/ворота">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c6">
+          <label>Время работы <span class="req-star">*</span></label>
+          <div class="hours">
+            <span class="h-lab">с</span>
+            <input type="text" class="control time-box" data-part="start" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">до</span>
+            <input type="text" class="control time-box" data-part="end" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">обед</span>
+            <input type="text" class="control time-box" data-part="lstart" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+            <span class="h-lab">—</span>
+            <input type="text" class="control time-box" data-part="lend" inputmode="numeric" maxlength="4" autocomplete="nope" placeholder="чч:мм">
+          </div>
+          <input type="hidden" class="hours-value" name="Режим работы на разгрузке">
+          <div class="err-msg">Укажите время «с» и «до»</div>
+        </div>
+        <div class="fld c6">
+          <label>Способ <span class="req-star">*</span></label>
+          <select class="control empty" name="Способ разгрузки">
+            <option value="" selected hidden>— выберите —</option>
+            <option>верхняя</option><option>боковая</option><option>задняя</option><option>не важно</option>
+          </select>
+          <div class="err-msg">Выберите вариант</div>
+        </div>
+        <div class="fld c3">
+          <label>Контактное лицо <span class="req-star">*</span></label>
+          <input class="control" name="Контактное лицо (разгрузка)" autocomplete="nope" placeholder="ФИО">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+        <div class="fld c3">
+          <label>Телефон <span class="req-star">*</span></label>
+          <input class="control" type="tel" data-tel name="Телефон (разгрузка)" autocomplete="nope" placeholder="+7 (___) ___-__-__">
+          <div class="err-msg">Заполните поле</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ПЕРЕВОЗКА + ОПЕРАТОР ИС ЭПД -->
+    <section class="sec sec-thin">
+      <div class="carry">
+        <div class="fld">
+          <div class="carry-line" style="display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+            <span class="carry-lab">Перевозка <span class="req-star">*</span></span>
+            <div class="seg">
+              <span class="seg-opt"><input type="radio" name="НДС" value="с НДС"><span>С НДС</span></span>
+              <span class="seg-opt"><input type="radio" name="НДС" value="без НДС"><span>Без НДС</span></span>
+            </div>
+            <div class="err-msg">Выберите вариант</div>
+          </div>
+        </div>
+        <div class="fld epd-fld">
+          <label>Оператор ИС ЭПД</label>
+          <input class="control" name="Оператор ИС ЭПД" autocomplete="nope" placeholder="наименование оператора ЭПД">
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 СЧЁТ -->
+    <section class="sec">
+      <div class="sec-head"><span class="sec-num">04</span><h2>Счёт</h2></div>
+      <div class="fld">
+        <input type="file" id="invoiceInput" name="Счёт (вложение)" hidden>
+        <div class="drop" id="drop">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7l-4-4z"/><path d="M14 3v4h4"/></svg>
+          <div>
+            <div class="dt">Прикрепить счёт</div>
+            <div class="ds">PDF, DOC, XLS, JPG · до 5 МБ · или перетащите файл сюда</div>
+          </div>
+        </div>
+        <div class="file-chip" id="fileChip" style="display:none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7l-4-4z"/><path d="M14 3v4h4"/></svg>
+          <div><div class="fn" id="fileName"></div><div class="fs" id="fileSize"></div></div>
+          <button type="button" id="fileRemove" title="Убрать файл">
+            <svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 ПРИМЕЧАНИЯ -->
+    <section class="sec">
+      <div class="sec-head"><span class="sec-num">05</span><h2>Примечания</h2></div>
+      <div class="fld">
+        <textarea class="control" name="Примечания" rows="2" autocomplete="nope" placeholder="пропуск на территорию, предоставить доверенность и пр."></textarea>
+      </div>
+    </section>
+
+    <!-- ПОДВАЛ: ГОЗ · ИГК · КНОПКИ -->
+    <footer class="form-foot">
+      <div class="fld goz-fld">
+        <label>ГОЗ</label>
+        <input class="control" name="ГОЗ" autocomplete="nope" placeholder="напр. 00-26/ЗК от 15 мая 2026 года">
+      </div>
+      <div class="fld igk-fld">
+        <label>ИГК</label>
+        <input class="control" name="ИГК" data-digits inputmode="numeric" maxlength="25" autocomplete="nope" placeholder="напр. 2627101000042751700100000">
+      </div>
+      <button type="submit" class="btn lg" id="sendBtn">
+        <span id="sendLabel">Отправить заявку</span>
+        <svg id="sendIco" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M1.5 8h12M9.5 4l4 4-4 4"/></svg>
+      </button>
+      <button type="button" class="btn ghost" id="copyBtn">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 5V3a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2"/></svg>
+        Скопировать текст
+      </button>
+    </footer>
+  </div>
+
+  <div class="fallback" id="fallback">
+    <b>Не удалось отправить автоматически.</b> Проверьте интернет-соединение и попробуйте ещё раз,
+    либо отправьте заявку вручную — текст уже собран.
+    <div class="fb-btns">
+      <a class="btn sm" id="mailtoLink" href="#">Открыть почтовую программу</a>
+      <button type="button" class="btn ghost sm" id="copyBtn2">Скопировать текст</button>
+      <button type="button" class="btn ghost sm" id="retryBtn">Повторить отправку</button>
+    </div>
+  </div>
+</form>
+</div>
+
+<div class="done" id="done">
+  <div class="done-card">
+    <div class="eyebrow mono">заявка зарегистрирована</div>
+    <div class="stamp">Отправлено</div>
+    <div class="done-no mono" id="doneNo"></div>
+    <p class="done-tx">Данные отправлены на <b>logist@vtkvostok.ru</b>.<span id="doneFile"></span></p>
+    <div class="done-btns">
+      <button type="button" class="btn ghost sm" id="copyBtn3">Скопировать текст</button>
+      <button type="button" class="btn sm" id="againBtn">Новая заявка</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ═══════════════ НАСТРОЙКИ ═══════════════ */
+  var EMAIL = 'logist@vtkvostok.ru';
+
+  /* SEND_URL — адрес серверного обработчика, который принимает заявку
+     (например 'send.php' или 'https://.../api/zayavka').
+     Данные уходят методом POST (FormData): все поля + файл 'invoice'.
+     Если оставить ПУСТО — кнопка «Отправить» соберёт текст письма,
+     подготовит mailto-ссылку и покажет блок ручной отправки. */
+  var SEND_URL = '';
+
+  /* ⚠ Ключ DaData виден всем в исходнике страницы.
+     Для продакшена делайте запрос через свой сервер-прокси. */
+  var DADATA_KEY = 'b06c8fad093c744ce393288ddb8962e8e3fbabbb';
+
+  var form    = document.getElementById('req');
+  var sheet   = document.getElementById('sheet');
+  var toastEl = document.getElementById('toast');
+
+  var attempted = false;   // пользователь уже нажимал «Отправить»
+  var sending   = false;   // отправка в процессе
+  var lastText  = '';      // собранный текст заявки
+
+  /* ═══════════════ ДАТА ПОДАЧИ ═══════════════ */
+  function p2(n){ return (n<10?'0':'')+n; }
+  var now = new Date();
+  var curY = now.getFullYear();
+  var reqDateStr = p2(now.getDate())+'.'+p2(now.getMonth()+1)+'.'+curY;
+  var reqTimeStr = p2(now.getHours())+':'+p2(now.getMinutes());
+  var todayISO = curY+'-'+p2(now.getMonth()+1)+'-'+p2(now.getDate());
+  document.getElementById('reqDate').textContent = reqDateStr+', '+reqTimeStr;
+
+  /* ═══════════════ АВТОНОМЕРАЦИЯ: VTK-ГГГГММДД-NN ═══════════════ */
+  var COUNTER_KEY = 'vtk_req_counter';
+  function readCounter(){
+    var st = {date: todayISO, n: 0};
+    try { st = JSON.parse(localStorage.getItem(COUNTER_KEY)) || st; } catch(e){}
+    if(st.date !== todayISO) st = {date: todayISO, n: 0};
+    return st;
+  }
+  function makeReqNo(){
+    return 'VTK-'+todayISO.replace(/-/g,'')+'-'+p2(readCounter().n + 1);
+  }
+  var reqNo = makeReqNo();
+  var reqNoCommitted = false;
+  function commitReqNo(){
+    if(reqNoCommitted) return;
+    reqNoCommitted = true;
+    var st = readCounter();
+    st.n = st.n + 1;
+    try { localStorage.setItem(COUNTER_KEY, JSON.stringify(st)); } catch(e){}
+  }
+  document.getElementById('reqNo').textContent = reqNo;
+
+  /* ═══════════════ СПИСКИ ПОЛЕЙ ═══════════════ */
+  var REQUIRED = ['Менеджер',
+    'Наименование груза','Длина, м','Ширина, м','Высота, м','Вес, т','Объём, м³','Количество мест','Упаковка','Груз готов',
+    'Способ погрузки','Режим работы на погрузке','Адрес погрузки','Контактное лицо (погрузка)','Телефон (погрузка)',
+    'Адрес разгрузки','Режим работы на разгрузке','Контактное лицо (разгрузка)','Телефон (разгрузка)','Способ разгрузки',
+    'НДС'];
+  var OPTIONAL = ['Грузоотправитель','ИНН отправителя','Юр. адрес отправителя','Контактное лицо (отправитель)','Телефон (отправитель)',
+    'Грузополучатель','ИНН получателя','Юр. адрес получателя','Контактное лицо (получатель)','Телефон (получатель)',
+    'ЛОП','ИНН ЛОП','Юр. адрес ЛОП','Контактное лицо (ЛОП)','Телефон (ЛОП)',
+    'Оператор ИС ЭПД','Примечания','ГОЗ','ИГК'];
+  var DIM_NAMES   = ['Длина, м','Ширина, м','Высота, м'];
+  var HOURS_NAMES = ['Режим работы на погрузке','Режим работы на разгрузке'];
+  var ALL = REQUIRED.concat(OPTIONAL);
+
+  /* ═══════════════ ЧТЕНИЕ ПОЛЕЙ ═══════════════ */
+  function getVal(name){
+    var radio = form.querySelector('input[name="'+name+'"]:checked');
+    if (radio) return radio.value;
+    var el = form.querySelector('[name="'+name+'"]');
+    return el ? (el.value||'').trim() : '';
+  }
+  function wrapOf(name){
+    var el = form.querySelector('[name="'+name+'"]');
+    if(!el) return null;
+    return el.closest('.fld') || el.closest('.sec') || el.parentElement || el;
+  }
+  function dateToISO(s){
+    var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(s||'');
+    if(!m) return '';
+    return m[3]+'-'+m[2]+'-'+m[1];
+  }
+
+  /* ═══════════════ ПАРСЕР ОКОШКА ВРЕМЕНИ ═══════════════ */
+  function parseTimeBox(box){
+    var d = (box.value||'').replace(/\D/g,'');
+    if(!d) return '';
+    var h, m;
+    if(d.length<=2){ h=d; m='0'; }
+    else if(d.length===3){
+      h=d.slice(0,1); m=d.slice(1);
+      if(parseInt(m,10)>59){ h=d.slice(0,2); m=d.slice(2)+'0'; }
+    }
+    else { h=d.slice(0,2); m=d.slice(2,4); }
+    var hh=parseInt(h,10), mm=parseInt(m,10);
+    if(isNaN(hh)) return '';
+    if(hh>23) hh=23;
+    if(isNaN(mm)||mm<0) mm=0;
+    if(mm>59) mm=59;
+    return p2(hh)+':'+p2(mm);
+  }
+
+  /* ═══ ЧТЕНИЕ БЛОКА ВРЕМЕНИ ═══
+     КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: поле, в котором сейчас стоит курсор,
+     НЕ перезаписывается — иначе печать ломалась на первой же цифре. */
+  function readHoursField(name){
+    var fld = wrapOf(name);
+    var boxes = fld ? fld.querySelectorAll('.time-box') : [];
+    var s='', e='', ls='', le='';
+    boxes.forEach(function(b){
+      var pv = parseTimeBox(b);
+      if(pv && document.activeElement !== b) b.value = pv;   /* ← фикс */
+      var part = b.getAttribute('data-part');
+      if(part==='start') s=pv;
+      else if(part==='end') e=pv;
+      else if(part==='lstart') ls=pv;
+      else if(part==='lend') le=pv;
+    });
+    var v='';
+    if(s && e){ v = s+'–'+e; if(ls && le) v += ', обед '+ls+'–'+le; }
+    var hid = form.querySelector('[name="'+name+'"]');
+    if(hid) hid.value = v;
+    return v;
+  }
+  function normalizeAllTimes(){
+    HOURS_NAMES.forEach(function(n){ readHoursField(n); });
+  }
+
+  /* ═══════════════ ПАРСЕР ДАТЫ ═══════════════ */
+  function parseDateText(val){
+    var d = (val||'').replace(/\D/g,'');
+    if(!d) return '';
+    var dd, mm, yy;
+    if(d.length<=2){ dd=d; mm=''; yy=''; }
+    else if(d.length===3){
+      dd=d.slice(0,1); mm=d.slice(1);
+      if(parseInt(mm,10)>12){ dd=d.slice(0,2); mm=d.slice(2); }
+      yy='';
+    }
+    else if(d.length===4){ dd=d.slice(0,2); mm=d.slice(2,4); yy=''; }
+    else if(d.length===6){ dd=d.slice(0,2); mm=d.slice(2,4); yy=d.slice(4,6); }
+    else { dd=d.slice(0,2); mm=d.slice(2,4); yy=d.slice(4,8); }
+    var D=parseInt(dd,10), M=parseInt(mm,10);
+    if(isNaN(D)||isNaN(M)) return '';
+    if(D<1) D=1; if(D>31) D=31;
+    if(M<1) M=1; if(M>12) M=12;
+    var Y;
+    if(!yy){ Y=curY; }
+    else {
+      var yN=parseInt(yy,10);
+      Y = (yy.length<=2) ? ((yN>=30)?1900+yN:2000+yN) : yN;
+    }
+    return p2(D)+'.'+p2(M)+'.'+Y;
+  }
+  function normalizeAllDates(){
+    form.querySelectorAll('[data-date]').forEach(function(b){
+      b.value = parseDateText(b.value);
+    });
+  }
+
+  /* ═══════════════ ПРОВЕРКА ОДНОГО ПОЛЯ ═══════════════ */
+  function check(name){
+    var required = REQUIRED.indexOf(name) > -1;
+
+    /* блоки времени — читаем прямо из видимых окошек */
+    if(HOURS_NAMES.indexOf(name)>-1){
+      var v = readHoursField(name);
+      if(!v && required) return {ok:false, msg:'Укажите время «с» и «до»'};
+      return {ok:true};
+    }
+
+    var val = getVal(name);
+    if(!val){
+      if(!required) return {ok:true};
+      if(name==='НДС' || name.indexOf('Способ')===0) return {ok:false, msg:'Выберите вариант'};
+      if(name==='Груз готов') return {ok:false, msg:'Заполните дату'};
+      if(DIM_NAMES.indexOf(name)>-1) return {ok:false, msg:'Заполните все три размера'};
+      return {ok:false, msg:'Заполните поле'};
+    }
+    if(name.indexOf('Телефон')===0){
+      var d = val.replace(/\D/g,'');
+      if(d.length<10 || d.length>15) return {ok:false, msg:'Проверьте номер: нужно не менее 10 цифр'};
+    }
+    if(name==='Количество мест' && !/^\d+([.,]\d+)?$/.test(val)) return {ok:false, msg:'Только цифры'};
+    if(name==='Вес, т' && !/^\d+([.,]\d+)?$/.test(val)) return {ok:false, msg:'Только цифры'};
+    if(name==='Объём, м³' && !/^\d+([.,]\d+)?$/.test(val)) return {ok:false, msg:'Только цифры'};
+    if(DIM_NAMES.indexOf(name)>-1){
+      if(!/^\d+([.,]\d{1,2})?$/.test(val)) return {ok:false, msg:'Только цифры, до 2 знаков после запятой'};
+    }
+    if(name==='Груз готов'){
+      var iso = dateToISO(val);
+      if(!iso) return {ok:false, msg:'Проверьте дату'};
+      if(iso < todayISO) return {ok:false, msg:'Дата уже прошла'};
+    }
+    return {ok:true};
+  }
+
+  /* ═══════════════ СОСТОЯНИЯ ОШИБОК ═══════════════ */
+  function setInvalid(name, msg){
+    var fld = wrapOf(name);
+    if(!fld) return;
+    fld.classList.add('invalid');
+    var m = fld.querySelector('.err-msg');
+    if(m && msg) m.textContent = msg;
+  }
+  function clearInvalid(name){
+    var el = form.querySelector('[name="'+name+'"]');
+    if(!el) return;
+    var f = el.closest('.fld') || el.closest('.sec');
+    if(f){
+      f.classList.remove('invalid','shake');
+      f.querySelectorAll('.time-box').forEach(function(b){ b.classList.remove('blink-one'); });
+    }
+  }
+  /* красным — только пустые обязательные «с»/«до»; обед не трогаем */
+  function markHours(fld, bad){
+    if(!fld) return;
+    fld.querySelectorAll('.time-box').forEach(function(b){
+      var part = b.getAttribute('data-part');
+      if(part==='start' || part==='end'){
+        b.classList.toggle('empty-req', bad && !b.value);
+      }
+    });
+  }
+  function openIfCollapsed(name){
+    var el = form.querySelector('[name="'+name+'"]');
+    if(!el) return;
+    var d = el.closest('details');
+    if(d && !d.open) d.open = true;
+  }
+  function blinkField(name){
+    var fld = wrapOf(name);
+    if(!fld) return;
+    if(fld.querySelector('.hours')){
+      fld.querySelectorAll('.time-box').forEach(function(b){
+        var part = b.getAttribute('data-part');
+        if((part==='start' || part==='end') && !b.value){
+          b.classList.add('empty-req');
+          b.classList.remove('blink-one'); void b.offsetWidth;
+          b.classList.add('blink-one');
+          setTimeout(function(){ b.classList.remove('blink-one'); }, 1500);
+        }
+      });
+      return;
+    }
+    fld.classList.remove('blink'); void fld.offsetWidth;
+    fld.classList.add('blink');
+    setTimeout(function(){ fld.classList.remove('blink'); }, 1500);
+  }
+
+  /* ═══ ФОН БЛАНКА: ГОЛУБОЙ → ЗЕЛЁНЫЙ ═══ */
+  var wasReady = false;
+  function updateReady(){
+    try{
+      var allOk = REQUIRED.every(function(n){ return check(n).ok; });
+      sheet.classList.toggle('ready', allOk);
+      if(allOk && !wasReady){ wasReady = true; showToast('Все обязательные поля заполнены — можно отправлять'); }
+      if(!allOk) wasReady = false;
+    }catch(e){}
+  }
+
+  /* ═══════════════ ТОСТ ═══════════════ */
+  var toastTimer = null;
+  function showToast(msg, isErr){
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('err', !!isErr);
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3400);
+  }
+
+  /* ═══════════════ ЖИВЫЕ СОБЫТИЯ ═══════════════ */
+  form.addEventListener('input', function(e){
+    var el = e.target;
+    try{
+      if(el.classList && el.classList.contains('time-box')){
+        /* только фильтр цифр — само поле во время набора НЕ форматируем */
+        el.value = el.value.replace(/\D/g,'').slice(0,4);
+        HOURS_NAMES.forEach(function(n){ readHoursField(n); });
+        var h = el.closest('.hours');
+        if(h){
+          var hid = h.querySelector('input.hours-value');
+          if(hid && REQUIRED.indexOf(hid.name)>-1) clearInvalid(hid.name);
+        }
+        updateReady();
+        return;
+      }
+      if(el.hasAttribute && el.hasAttribute('data-date')){
+        el.value = el.value.replace(/[^\d.]/g,'').slice(0,10);
+        if(REQUIRED.indexOf(el.name)>-1) clearInvalid(el.name);
+        updateReady();
+        return;
+      }
+      if(el.classList && el.classList.contains('inn-input')){
+        el.value = el.value.replace(/\D/g,'').slice(0,12);
+        var len = el.value.length;
+        if(len===10 || len===12){ scheduleLookup(el.name, el.value); }
+        else { clearTimeout(timers[el.name]); setStatus(el.name,'',''); }
+      }
+      if(el.hasAttribute && el.hasAttribute('data-tel')){
+        var v = el.value.replace(/[^\d+()\-\s]/g,'').replace(/(?!^)\+/g,'');
+        if(v!==el.value) el.value = v;
+      }
+      if(el.hasAttribute && el.hasAttribute('data-num')){
+        var seen = false;
+        var v2 = el.value.replace(/[^\d.,]/g,'').replace(/[.,]/g, function(m){ if(seen){return '';} seen=true; return m; });
+        if(v2!==el.value) el.value = v2;
+      }
+      if(el.hasAttribute && el.hasAttribute('data-digits')){
+        var v4 = el.value.replace(/\D/g,'');
+        if(v4!==el.value) el.value = v4;
+      }
+      if(el.hasAttribute && el.hasAttribute('data-dim')){
+        var dseen = false;
+        var v3 = el.value.replace(/[^\d.,]/g,'').replace(/[.,]/g, function(m){ if(dseen){return '';} dseen=true; return m; });
+        v3 = v3.replace(/([.,]\d{2}).*$/, '$1');
+        v3 = v3.slice(0,7);
+        if(v3!==el.value) el.value = v3;
+      }
+      var n = el.name;
+      if(n==='Способ погрузки'||n==='Способ разгрузки') el.classList.remove('empty');
+      if(n){ if(REQUIRED.indexOf(n)>-1) clearInvalid(n); updateReady(); }
+    }catch(err){}
+  });
+
+  form.addEventListener('change', function(e){
+    var t = e.target;
+    if(t.type==='radio'){ clearInvalid(t.name); }
+    if(t.tagName==='SELECT'){
+      t.classList.toggle('empty', !t.value);
+      if(REQUIRED.indexOf(t.name)>-1) clearInvalid(t.name);
+    }
+    updateReady();
+  });
+
+  form.addEventListener('focusout', function(e){
+    var el = e.target;
+    try{
+      if(el.classList && el.classList.contains('time-box')){
+        /* ушли из окошка — приводим к ЧЧ:ММ */
+        el.value = parseTimeBox(el) || el.value;
+        HOURS_NAMES.forEach(function(n){ readHoursField(n); });
+        if(attempted){
+          var fld = el.closest('.fld');
+          var hid = fld ? fld.querySelector('input.hours-value') : null;
+          if(hid){
+            var r = check(hid.name);
+            markHours(fld, !r.ok);
+            if(!r.ok) setInvalid(hid.name, r.msg);
+            else clearInvalid(hid.name);
+          }
+        }
+        updateReady();
+        return;
+      }
+      if(el.hasAttribute && el.hasAttribute('data-date')){
+        el.value = parseDateText(el.value);
+        if(attempted){
+          var r4 = check(el.name);
+          if(!r4.ok) setInvalid(el.name, r4.msg);
+          else clearInvalid(el.name);
+        }
+        updateReady();
+        return;
+      }
+      if(!attempted) return;
+      if(!el.name) return;
+      if(el.tagName==='SELECT' || el.type==='radio') return;
+      if(REQUIRED.indexOf(el.name)===-1) return;
+      var r2 = check(el.name);
+      if(!r2.ok) setInvalid(el.name, r2.msg);
+    }catch(err){}
+  });
+
+  form.addEventListener('focusin', function(e){
+    var t = e.target;
+    if(t.classList && (t.classList.contains('time-box') || t.classList.contains('date-box'))){
+      try{ t.select(); }catch(err){}
+    }
+  });
+
+  /* ═══════════════ ПОИСК КОМПАНИИ ПО ИНН (DaData) ═══════════════ */
+  var INN_MAP = {
+    'ИНН отправителя': {name:'Грузоотправитель', addr:'Юр. адрес отправителя'},
+    'ИНН получателя':  {name:'Грузополучатель',  addr:'Юр. адрес получателя'},
+    'ИНН ЛОП':         {name:'ЛОП',              addr:'Юр. адрес ЛОП'}
+  };
+  var timers = {}, busy = {};
+
+  function setStatus(innName, msg, type){
+    var el = form.querySelector('[data-status="'+innName+'"]');
+    if(!el) return;
+    el.textContent = msg;
+    el.className = 'inn-status mono' + (type ? ' '+type : '');
+  }
+  function flash(el){
+    el.classList.remove('autofilled'); void el.offsetWidth;
+    el.classList.add('autofilled');
+    setTimeout(function(){ el.classList.remove('autofilled'); }, 1600);
+  }
+  function safeJson(r){
+    return r.text().then(function(t){
+      try { return JSON.parse(t); } catch(e){ throw {code:'bad'}; }
+    });
+  }
+  function daDataLookup(inn){
+    return fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json','Authorization':'Token '+DADATA_KEY},
+      body: JSON.stringify({query: inn, count: 1})
+    }).then(function(r){
+      if(r.status===401) throw {code:'badkey'};
+      if(r.status===402 || r.status===403) throw {code:'noaccess'};
+      if(r.status===429) throw {code:'limit'};
+      return safeJson(r);
+    }).then(function(d){
+      var s = (d && d.suggestions && d.suggestions[0]);
+      if(!s) throw {code:'notfound'};
+      return {name: s.value, address: (s.data && s.data.address && s.data.address.value) || ''};
+    });
+  }
+  function doLookup(innName, inn){
+    if(busy[innName]) return;
+    busy[innName] = true;
+    var btn = form.querySelector('.inn-btn[data-inn="'+innName+'"]');
+    if(btn) btn.classList.add('loading');
+    function done(){
+      busy[innName] = false;
+      if(btn) btn.classList.remove('loading');
+    }
+    daDataLookup(inn).then(function(res){
+      done();
+      var map = INN_MAP[innName];
+      if(!map) return;
+      if(res.name){
+        var nameEl = form.querySelector('[name="'+map.name+'"]');
+        if(nameEl){ nameEl.value = res.name; flash(nameEl); }
+      }
+      if(res.address){
+        var addrEl = form.querySelector('[name="'+map.addr+'"]');
+        if(addrEl && !addrEl.value){ addrEl.value = res.address; flash(addrEl); }
+      }
+      setStatus(innName, '✓ найдено: ' + res.name, 'ok');
+    }, function(err){
+      done();
+      var code = err && err.code;
+      if(code==='badkey')        setStatus(innName, 'Ключ DaData недействителен', 'warn');
+      else if(code==='noaccess') setStatus(innName, 'Нет доступа к DaData', 'warn');
+      else if(code==='limit')    setStatus(innName, 'Превышен лимит запросов', 'warn');
+      else if(code==='notfound') setStatus(innName, 'Организация не найдена', 'warn');
+      else                       setStatus(innName, 'Сервис проверки недоступен', 'warn');
+    });
+  }
+  function scheduleLookup(innName, inn){
+    clearTimeout(timers[innName]);
+    setStatus(innName, 'Ищем…', '');
+    timers[innName] = setTimeout(function(){ doLookup(innName, inn); }, 500);
+  }
+  form.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('.inn-btn') : null;
+    if(!btn) return;
+    var innName = btn.getAttribute('data-inn');
+    var input = form.querySelector('[name="'+innName+'"]');
+    var v = ((input && input.value) || '').replace(/\D/g,'');
+    if(v.length!==10 && v.length!==12){
+      setStatus(innName, 'Введите ИНН: 10 или 12 цифр', 'warn');
+      if(input) input.focus();
+      return;
+    }
+    doLookup(innName, v);
+  });
+
+  /* ═══════════════ ВЛОЖЕНИЕ: СЧЁТ ═══════════════ */
+  var invoiceInput = document.getElementById('invoiceInput');
+  var drop    = document.getElementById('drop');
+  var fileChip   = document.getElementById('fileChip');
+  var fileNameEl = document.getElementById('fileName');
+  var fileSizeEl = document.getElementById('fileSize');
+  var currentFile = null;
+  var MAX_SIZE = 5*1024*1024;
+  var OK_EXT = /\.(pdf|doc|docx|xls|xlsx|jpg|jpeg|png)$/i;
+
+  function fmtSize(b){
+    if(b>=1048576) return (b/1048576).toFixed(1)+' МБ';
+    if(b>=1024) return Math.round(b/1024)+' КБ';
+    return b+' Б';
+  }
+  function setFile(f){
+    if(!f) return;
+    if(!OK_EXT.test(f.name)){ showToast('Формат не поддерживается: PDF, DOC, XLS, JPG', true); return; }
+    if(f.size > MAX_SIZE){ showToast('Файл больше 5 МБ', true); return; }
+    currentFile = f;
+    fileNameEl.textContent = f.name;
+    fileSizeEl.textContent = fmtSize(f.size);
+    drop.style.display = 'none';
+    fileChip.style.display = '';
+  }
+  function clearFile(){
+    currentFile = null;
+    invoiceInput.value = '';
+    fileChip.style.display = 'none';
+    drop.style.display = '';
+  }
+  drop.addEventListener('click', function(){ invoiceInput.click(); });
+  invoiceInput.addEventListener('change', function(){
+    if(invoiceInput.files && invoiceInput.files[0]) setFile(invoiceInput.files[0]);
+  });
+  document.getElementById('fileRemove').addEventListener('click', function(e){
+    e.stopPropagation();
+    clearFile();
+  });
+  ['dragenter','dragover'].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function(e){
+    var fs = e.dataTransfer && e.dataTransfer.files;
+    if(fs && fs.length) setFile(fs[0]);
+  });
+
+  /* ═══════════════ СБОРКА ТЕКСТА ЗАЯВКИ ═══════════════ */
+  function buildText(){
+    normalizeAllTimes();
+    normalizeAllDates();
+    var L = [];
+    L.push('ЗАЯВКА НА ПОДБОР ТРАНСПОРТА № ' + reqNo);
+    L.push('Подана: ' + reqDateStr + ', ' + reqTimeStr);
+    L.push('Заявку подал(а): ' + getVal('Менеджер'));
+
+    /* 00 Реквизиты — только заполненные блоки */
+    var parties = [
+      {t:'Грузоотправитель', n:'Грузоотправитель', inn:'ИНН отправителя', a:'Юр. адрес отправителя', c:'Контактное лицо (отправитель)', tel:'Телефон (отправитель)'},
+      {t:'Грузополучатель',  n:'Грузополучатель',  inn:'ИНН получателя',  a:'Юр. адрес получателя',  c:'Контактное лицо (получатель)',  tel:'Телефон (получатель)'},
+      {t:'ЛОП',              n:'ЛОП',              inn:'ИНН ЛОП',         a:'Юр. адрес ЛОП',         c:'Контактное лицо (ЛОП)',         tel:'Телефон (ЛОП)'}
+    ];
+    if(parties.some(function(p){ return getVal(p.n)||getVal(p.inn)||getVal(p.a)||getVal(p.c)||getVal(p.tel); })){
+      L.push('');
+      parties.forEach(function(p){
+        if(!(getVal(p.n)||getVal(p.inn)||getVal(p.a)||getVal(p.c)||getVal(p.tel))) return;
+        L.push(p.t+':');
+        if(getVal(p.n))   L.push('  наименование: ' + getVal(p.n));
+        if(getVal(p.inn)) L.push('  ИНН: ' + getVal(p.inn));
+        if(getVal(p.a))   L.push('  адрес: ' + getVal(p.a));
+        if(getVal(p.c))   L.push('  контакт: ' + getVal(p.c));
+        if(getVal(p.tel)) L.push('  телефон: ' + getVal(p.tel));
+      });
+    }
+
+    L.push('');
+    L.push('— ГРУЗ —');
+    L.push('Наименование: ' + getVal('Наименование груза'));
+    L.push('Упаковка: ' + getVal('Упаковка'));
+    L.push('Габариты (Д×Ш×В), м: ' + [getVal('Длина, м'), getVal('Ширина, м'), getVal('Высота, м')].join(' × '));
+    L.push('Вес, т: ' + getVal('Вес, т'));
+    L.push('Объём, м³: ' + getVal('Объём, м³'));
+    L.push('Кол-во мест: ' + getVal('Количество мест'));
+    L.push('Груз готов: ' + getVal('Груз готов'));
+
+    L.push('');
+    L.push('— ПОГРУЗКА —');
+    L.push('Адрес: ' + getVal('Адрес погрузки'));
+    L.push('Время работы: ' + getVal('Режим работы на погрузке'));
+    L.push('Способ: ' + getVal('Способ погрузки'));
+    L.push('Контакт: ' + getVal('Контактное лицо (погрузка)') + ', тел. ' + getVal('Телефон (погрузка)'));
+
+    L.push('');
+    L.push('— РАЗГРУЗКА —');
+    L.push('Адрес: ' + getVal('Адрес разгрузки'));
+    L.push('Время работы: ' + getVal('Режим работы на разгрузке'));
+    L.push('Способ: ' + getVal('Способ разгрузки'));
+    L.push('Контакт: ' + getVal('Контактное лицо (разгрузка)') + ', тел. ' + getVal('Телефон (разгрузка)'));
+
+    L.push('');
+    L.push('— ПЕРЕВОЗКА —');
+    L.push('НДС: ' + (getVal('НДС') || '—'));
+    if(getVal('Оператор ИС ЭПД')) L.push('Оператор ИС ЭПД: ' + getVal('Оператор ИС ЭПД'));
+
+    if(getVal('Примечания')){ L.push(''); L.push('— ПРИМЕЧАНИЯ —'); L.push(getVal('Примечания')); }
+    if(getVal('ГОЗ') || getVal('ИГК')){
+      L.push('');
+      if(getVal('ГОЗ')) L.push('ГОЗ: ' + getVal('ГОЗ'));
+      if(getVal('ИГК')) L.push('ИГК: ' + getVal('ИГК'));
+    }
+    if(currentFile) L.push('Вложение: ' + currentFile.name + ' (' + fmtSize(currentFile.size) + ')');
+
+    return L.join('\n');
+  }
+
+  /* ═══════════════ ОТПРАВКА ═══════════════ */
+  function setSending(on){
+    var btn = document.getElementById('sendBtn');
+    btn.disabled = on;
+    document.getElementById('sendLabel').textContent = on ? 'Отправляем…' : 'Отправить заявку';
+  }
+  function prepareMailto(text){
+    var subj = 'Заявка на транспорт № ' + reqNo;
+    document.getElementById('mailtoLink').href =
+      'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subj) + '&body=' + encodeURIComponent(text);
+  }
+  function showFallback(){
+    prepareMailto(lastText);
+    var fb = document.getElementById('fallback');
+    fb.classList.add('show');
+    if(fb.scrollIntoView) fb.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  function showDone(){
+    document.getElementById('doneNo').textContent = '№ ' + reqNo;
+    document.getElementById('doneFile').textContent = currentFile ? ' Вложение: ' + currentFile.name + '.' : '';
+    document.getElementById('done').classList.add('show');
+  }
+
+  function send(){
+    if(sending) return;
+    sending = true;
+    setSending(true);
+    lastText = buildText();
+
+    /* нет серверного обработчика — ручная отправка письмом */
+    if(!SEND_URL){
+      sending = false; setSending(false);
+      showFallback();
+      showToast('Заявка собрана — отправьте письмом или скопируйте текст');
+      return;
+    }
+
+    var fd = new FormData();
+    fd.append('number', reqNo);
+    ALL.forEach(function(n){ fd.append(n, getVal(n)); });
+    if(currentFile) fd.append('invoice', currentFile);
+
+    fetch(SEND_URL, {method:'POST', body: fd})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r; })
+      .then(function(){
+        sending = false; setSending(false);
+        showDone();
+      })
+      .catch(function(){
+        sending = false; setSending(false);
+        showFallback();
+        showToast('Не удалось отправить автоматически', true);
+      });
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(sending) return;
+
+    /* СНАЧАЛА нормализуем время и даты, ПОТОМ валидируем */
+    normalizeAllTimes();
+    normalizeAllDates();
+    attempted = true;
+
+    var bad = [];
+    REQUIRED.forEach(function(n){
+      var r = check(n);
+      var fld = wrapOf(n);
+      if(!r.ok){
+        setInvalid(n, r.msg);
+        markHours(fld, true);
+        openIfCollapsed(n);
+        bad.push(n);
+      } else {
+        clearInvalid(n);
+        markHours(fld, false);
+      }
+    });
+
+    if(bad.length){
+      blinkField(bad[0]);
+      var first = wrapOf(bad[0]);
+      if(first && first.scrollIntoView) first.scrollIntoView({behavior:'smooth', block:'center'});
+      showToast('Заполните обязательные поля — осталось: ' + bad.length, true);
+      return;
+    }
+
+    commitReqNo();
+    send();
+  });
+
+  /* кнопка «Отправить» в шапке */
+  document.getElementById('topSubmit').addEventListener('click', function(){
+    if(form.requestSubmit){ form.requestSubmit(); }
+    else {
+      var ev = document.createEvent('Event');
+      ev.initEvent('submit', true, true);
+      form.dispatchEvent(ev);
+    }
+  });
+
+  /* ═══════════════ КОПИРОВАНИЕ ТЕКСТА ═══════════════ */
+  function copyText(){
+    var text = lastText || buildText();
+    function fallbackCopy(){
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('Текст заявки скопирован'); }
+      catch(e){ showToast('Не удалось скопировать', true); }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ showToast('Текст заявки скопирован'); }, fallbackCopy);
+    } else fallbackCopy();
+  }
+  ['copyBtn','copyBtn2','copyBtn3'].forEach(function(id){
+    var b = document.getElementById(id);
+    if(b) b.addEventListener('click', copyText);
+  });
+
+  /* ═══════════════ МОДАЛКА «ОТПРАВЛЕНО» / НОВАЯ ЗАЯВКА ═══════════════ */
+  document.getElementById('againBtn').addEventListener('click', function(){
+    document.getElementById('done').classList.remove('show');
+    form.reset();
+    clearFile();
+    form.querySelectorAll('select.control').forEach(function(s){ s.classList.add('empty'); });
+    form.querySelectorAll('.fld').forEach(function(f){ f.classList.remove('invalid','shake'); });
+    form.querySelectorAll('.time-box').forEach(function(b){ b.classList.remove('empty-req','blink-one'); });
+    document.getElementById('fallback').classList.remove('show');
+    attempted = false; wasReady = false; sending = false; lastText = '';
+    sheet.classList.remove('ready');
+    reqNo = makeReqNo();
+    document.getElementById('reqNo').textContent = reqNo;
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', function(){
+    document.getElementById('fallback').classList.remove('show');
+    send();
+  });
+})();
+</script>
+</body>
+</html>
