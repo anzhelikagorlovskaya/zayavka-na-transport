@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заявка на подбор транспорта — ВТК Восток</title>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.11.1/css/suggestions.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.11.1/js/jquery.suggestions.min.js"></script>
+
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 12px; color: #222; transition: background-color 0.6s ease; font-size: 13px; }
+  body.draft { background: #dbeafe; }
+  body.ready { background: #bbf7d0; }
+  .wrap { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.06); padding: 16px 20px; }
+  .form-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid #eef1f5; }
+  .form-header-left { flex: 1; min-width: 0; }
+  .form-header-top { font-size: 11px; color: #999; letter-spacing: 0.3px; margin-bottom: 2px; }
+  .form-header-title { font-size: 22px; font-weight: 700; color: #111; margin: 0 0 10px; letter-spacing: -0.3px; }
+  .form-header-author { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 11.5px; color: #888; }
+  .form-header-author input { flex: 1; min-width: 180px; max-width: 320px; height: 26px; padding: 3px 8px; border: 1px solid #d0d7e0; border-radius: 4px; font-size: 12.5px; font-family: inherit; background: #fff; }
+  .form-header-author input:focus { outline: none; border-color: #0b4f8a; box-shadow: 0 0 0 2px rgba(11,79,138,.12); }
+  .form-header-right { flex: 0 0 auto; background: #fafbfc; border: 1px solid #e4e8ee; border-radius: 6px; padding: 8px 12px; font-size: 11.5px; color: #555; line-height: 1.6; min-width: 240px; }
+  .form-header-right .meta-row { display: flex; gap: 6px; }
+  .form-header-right .meta-label { color: #999; min-width: 60px; }
+  .form-header-right .meta-value { color: #222; font-weight: 500; font-family: "Consolas", "Courier New", monospace; }
+  .agents-section { background: #fafbfc; border: 1px solid #d0d7e0; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .agents-section > summary { padding: 12px 14px; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; user-select: none; }
+  .agents-section > summary::-webkit-details-marker { display: none; }
+  .agents-section > summary::before { content: "▶"; font-size: 10px; transition: transform .2s; color: #0b4f8a; order: -1; }
+  .agents-section[open] > summary::before { transform: rotate(90deg); }
+  .agents-title { margin: 0; font-size: 17px; color: #0b4f8a; font-weight: 700; }
+  .agents-notice { background: #fff3e0; border-left: 4px solid #ffb74d; padding: 6px 10px; border-radius: 4px; font-size: 12.5px; font-weight: 600; color: #6d4a14; }
+  .agents-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 14px 14px; }
+  .agent-card { background: #fff; border: 1px solid #e4e8ee; border-radius: 6px; padding: 10px 12px; }
+  .agent-card h4 { margin: 0 0 8px; font-size: 13px; color: #0b4f8a; font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid #eef1f5; }
+  fieldset { border: 1px solid #d0d7e0; background: #fafbfc; border-radius: 6px; padding: 10px 14px 12px; margin: 0 0 8px; }
+  legend { font-weight: 600; color: #0b4f8a; padding: 0; font-size: 14px; margin-bottom: 6px; }
+  .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; margin-bottom: 6px; align-items: start; }
+  .row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; min-width: 0; }
+  .c4 { grid-column: span 4; }
+  .c5 { grid-column: span 5; }
+  .c7 { grid-column: span 7; }
+  .c12 { grid-column: span 12; }
+  label { font-size: 11.5px; margin-bottom: 2px; color: #555; display: flex; align-items: center; gap: 3px; flex-wrap: wrap; line-height: 1.2; }
+  label .req { color: #d9534f; }
+  input[type="text"], input[type="date"], input[type="time"], input[type="tel"], input[type="file"], select, textarea { padding: 4px 8px; border: 1px solid #d0d7e0; border-radius: 4px; font-size: 13px; font-family: inherit; background: #fff; transition: border-color .15s, background .15s; width: 100%; height: 28px; }
+  textarea { height: auto; min-height: 40px; resize: vertical; padding: 6px 8px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #0b4f8a; box-shadow: 0 0 0 2px rgba(11,79,138,.12); }
+  .error { border-color: #d9534f !important; background: #fff4f3 !important; }
+  .error-msg { display: none; color: #d9534f; font-size: 10.5px; margin-top: 2px; }
+  .error + .error-msg { display: block; }
+  @keyframes blink-red { 0%, 100% { border-color: #d9534f; background: #fff4f3; box-shadow: 0 0 0 2px rgba(217,83,79,.25); } 50% { border-color: #d9534f; background: #ffd9d4; box-shadow: 0 0 0 6px rgba(217,83,79,.45); } }
+  .blink-error { animation: blink-red 0.45s ease-in-out 3 !important; border-color: #d9534f !important; background: #fff4f3 !important; }
+  .inn-wrapper { position: relative; display: flex; align-items: center; }
+  .inn-wrapper input { padding-right: 28px; }
+  .inn-search-btn { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; font-size: 13px; padding: 2px 5px; border-radius: 3px; }
+  .inn-search-btn:hover { background: #eef2f7; }
+  .cargo-params { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+  .cargo-params .field { min-width: 0; }
+  .cargo-params input.date-input { font-family: "Consolas", "Courier New", monospace; text-align: center; letter-spacing: 0.5px; }
+  .cargo-main-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+  .cargo-main-row textarea { height: 80px; min-height: 80px; }
+  .address-time-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 8px; margin-bottom: 6px; align-items: start; }
+  .address-field textarea { min-height: 28px; height: 28px; resize: vertical; }
+  .time-row { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .time-row input.time-input { width: 50px; flex: 0 0 auto; text-align: center; font-family: "Consolas", "Courier New", monospace; }
+  .time-row .sep { color: #888; font-size: 12px; }
+  .time-row .lunch-label { font-size: 11px; color: #888; }
+  .time-row .divider { width: 1px; height: 18px; background: #d0d7e0; margin: 0 4px; }
+  .vat-operator { display: flex; align-items: center; gap: 20px; padding: 10px 14px; background: #fafbfc; border: 1px solid #d0d7e0; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .vat-operator .vat-section { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .vat-operator .lbl { font-size: 14px; font-weight: 600; color: #0b4f8a; }
+  .vat-operator label { display: flex; align-items: center; gap: 5px; font-weight: normal; cursor: pointer; font-size: 13px; margin: 0; color: #333; }
+  .vat-operator .operator-section { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; }
+  .vat-operator .operator-section label { font-size: 14px; font-weight: 600; color: #0b4f8a; white-space: nowrap; margin: 0; }
+  .vat-operator .operator-section input { flex: 1; }
+  .actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .submit-btn, .reset-btn { padding: 9px 22px; border: none; border-radius: 5px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .submit-btn { background: #0b4f8a; color: #fff; }
+  .submit-btn:hover { background: #083a68; }
+  .submit-btn:disabled { background: #999; cursor: not-allowed; }
+  .reset-btn { background: #e6ebf1; color: #333; }
+  .reset-btn:hover { background: #d6dde6; }
+  .success-message { display: none; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 16px 20px; margin-top: 16px; text-align: center; }
+  .success-message.show { display: block; }
+  .success-message h3 { margin: 0 0 8px; color: #155724; font-size: 16px; }
+  .success-message p { margin: 0; color: #155724; font-size: 13px; }
+  .error-message-box { display: none; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 16px 20px; margin-top: 16px; text-align: center; }
+  .error-message-box.show { display: block; }
+  .error-message-box h3 { margin: 0 0 8px; color: #721c24; font-size: 16px; }
+  .error-message-box p { margin: 0; color: #721c24; font-size: 13px; }
+  @media (max-width: 760px) {
+    .form-header { flex-direction: column; }
+    .form-header-right { width: 100%; }
+    .agents-grid { grid-template-columns: 1fr; }
+    .cargo-main-row { grid-template-columns: 1fr; }
+    .cargo-params { grid-template-columns: repeat(4, 1fr); }
+    .vat-operator { flex-direction: column; align-items: stretch; }
+    .address-time-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="draft">
+
+<div class="wrap">
+  <div class="form-header">
+    <div class="form-header-left">
+      <div class="form-header-top">Отдел логистики · внутренняя форма</div>
+      <h1 class="form-header-title">Заявка на подбор транспорта</h1>
+      <div class="form-header-author">
+        <span>Заявку подал(а) <span style="color:#d9534f">*</span> Фамилия, имя</span>
+        <input type="text" name="submitted_by" id="submitted_by" placeholder="Иванов Иван" required autocomplete="name">
+      </div>
+    </div>
+    <div class="form-header-right">
+      <div class="meta-row">
+        <span class="meta-label">№</span>
+        <span class="meta-value" id="requestNumber">VTK-…</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">подана:</span>
+        <span class="meta-value" id="submitDateTime">…</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">на:</span>
+        <span class="meta-value">89526170163@ya.ru</span>
+      </div>
+    </div>
+  </div>
+
+  <form id="cargoForm" autocomplete="off">
+    <input type="hidden" name="_subject" value="Новая заявка на подбор транспорта">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="table">
+    <input type="text" name="_honey" style="display:none">
+    <input type="hidden" name="request_number" id="request_number_hidden">
+    <input type="hidden" name="submit_date" id="submit_date_hidden">
+    <input type="hidden" name="submit_time" id="submit_time_hidden">
+
+    <details class="agents-section">
+      <summary>
+        <h2 class="agents-title">Грузоотправитель / Грузополучатель / ЛОП</h2>
+        <span class="agents-notice">Заполнение не требуется, если это ВТК-Восток</span>
+      </summary>
+      <div class="agents-grid">
+        <div class="agent-card">
+          <h4>Грузоотправитель</h4>
+          <div class="field" style="margin-bottom:6px;"><label>ИНН</label><input type="text" name="sender_inn" class="inn-input" placeholder="10 или 12 цифр" maxlength="12" data-company="sender_company" data-address="sender_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Наименование <span class="auto">(авто)</span></label><input type="text" name="sender_company" id="sender_company" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Юридический адрес <span class="auto">(авто)</span></label><input type="text" name="sender_address" id="sender_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Контактное лицо</label><input type="text" name="sender_contact" autocomplete="off"></div>
+          <div class="field"><label>Телефон</label><input type="tel" name="sender_phone" class="phone-input" placeholder="+7 (___) ___-__-__" autocomplete="off"></div>
+        </div>
+
+        <div class="agent-card">
+          <h4>Грузополучатель</h4>
+          <div class="field" style="margin-bottom:6px;"><label>ИНН</label><input type="text" name="receiver_inn" class="inn-input" placeholder="10 или 12 цифр" maxlength="12" data-company="receiver_company" data-address="receiver_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Наименование <span class="auto">(авто)</span></label><input type="text" name="receiver_company" id="receiver_company" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Юридический адрес <span class="auto">(авто)</span></label><input type="text" name="receiver_address" id="receiver_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Контактное лицо</label><input type="text" name="receiver_contact" autocomplete="off"></div>
+          <div class="field"><label>Телефон</label><input type="tel" name="receiver_phone" class="phone-input" placeholder="+7 (___) ___-__-__" autocomplete="off"></div>
+        </div>
+
+        <div class="agent-card">
+          <h4>ЛОП</h4>
+          <div class="field" style="margin-bottom:6px;"><label>ИНН</label><input type="text" name="lop_inn" class="inn-input" placeholder="10 или 12 цифр" maxlength="12" data-company="lop_company" data-address="lop_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Наименование <span class="auto">(авто)</span></label><input type="text" name="lop_company" id="lop_company" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Юридический адрес <span class="auto">(авто)</span></label><input type="text" name="lop_address" id="lop_address" autocomplete="off"></div>
+          <div class="field" style="margin-bottom:6px;"><label>Контактное лицо</label><input type="text" name="lop_contact" autocomplete="off"></div>
+          <div class="field"><label>Телефон</label><input type="tel" name="lop_phone" class="phone-input" placeholder="+7 (___) ___-__-__" autocomplete="off"></div>
+        </div>
+      </div>
+    </details>
+
+    <fieldset>
+      <legend>1. Груз</legend>
+      <div class="cargo-main-row">
+        <div class="field"><label>Наименование <span class="req">*</span></label><textarea name="cargo_name" placeholder="Введите наименование груза" required autocomplete="off"></textarea><span class="error-msg">Укажите наименование</span></div>
+        <div class="field"><label>Упаковка <span class="req">*</span></label><textarea name="cargo_package" placeholder="короб, паллета, мешки, биг-бэг..." required autocomplete="off"></textarea><span class="error-msg">Опишите упаковку</span></div>
+      </div>
+      <div class="cargo-params">
+        <div class="field"><label>Д, м <span class="req">*</span></label><input type="text" name="cargo_length" class="number-input" placeholder="1.2" required autocomplete="off"><span class="error-msg">Длина</span></div>
+        <div class="field"><label>Ш, м <span class="req">*</span></label><input type="text" name="cargo_width" class="number-input" placeholder="0.8" required autocomplete="off"><span class="error-msg">Ширина</span></div>
+        <div class="field"><label>В, м <span class="req">*</span></label><input type="text" name="cargo_height" class="number-input" placeholder="1.0" required autocomplete="off"><span class="error-msg">Высота</span></div>
+        <div class="field"><label>Вес, кг <span class="req">*</span></label><input type="text" name="cargo_weight" class="number-input" required autocomplete="off"><span class="error-msg">Вес</span></div>
+        <div class="field"><label>Объём, м³ <span class="req">*</span></label><input type="text" name="cargo_volume" class="number-input" required autocomplete="off"><span class="error-msg">Объём</span></div>
+        <div class="field"><label>Мест <span class="req">*</span></label><input type="text" name="cargo_places" class="number-input" placeholder="12" required autocomplete="off"><span class="error-msg">Места</span></div>
+        <div class="field"><label>Груз готов <span class="req">*</span></label><input type="text" name="cargo_ready_date" class="date-input" placeholder="ДД.ММ.ГГ" maxlength="8" required autocomplete="off"><span class="error-msg">Укажите дату (ДД.ММ.ГГ)</span></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. Погрузка</legend>
+      <div class="address-time-grid">
+        <div class="address-field"><label>Адрес погрузки <span class="req">*</span></label><textarea name="loading_address" placeholder="Город, улица, дом, склад" required autocomplete="off"></textarea><span class="error-msg">Укажите адрес</span></div>
+        <div class="time-field">
+          <label>Время работы <span class="req">*</span></label>
+          <div class="time-row">
+            <span class="sep">с</span><input type="text" name="loading_from" class="time-input" placeholder="09:00" maxlength="5" required autocomplete="off">
+            <span class="sep">до</span><input type="text" name="loading_to" class="time-input" placeholder="18:00" maxlength="5" required autocomplete="off">
+            <span class="divider"></span>
+            <span class="lunch-label">обед</span><input type="text" name="loading_lunch_from" class="time-input" placeholder="13:00" maxlength="5" autocomplete="off">
+            <span class="sep">–</span><input type="text" name="loading_lunch_to" class="time-input" placeholder="14:00" maxlength="5" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field c4"><label>Контактное лицо <span class="req">*</span></label><input type="text" name="loading_contact" required autocomplete="off"><span class="error-msg">Укажите контакт</span></div>
+        <div class="field c4"><label>Телефон <span class="req">*</span></label><input type="tel" name="loading_phone" class="phone-input" placeholder="+7 (___) ___-__-__" required autocomplete="off"><span class="error-msg">Укажите телефон</span></div>
+        <div class="field c4"><label>Способ <span class="req">*</span></label><select name="loading_type" required><option value="">— выберите —</option><option>Верхняя</option><option>Боковая</option><option>Задняя</option><option>Не важно</option></select><span class="error-msg">Выберите способ</span></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3. Разгрузка</legend>
+      <div class="address-time-grid">
+        <div class="address-field"><label>Адрес разгрузки <span class="req">*</span></label><textarea name="unloading_address" placeholder="Город, улица, дом, склад" required autocomplete="off"></textarea><span class="error-msg">Укажите адрес</span></div>
+        <div class="time-field">
+          <label>Время работы <span class="req">*</span></label>
+          <div class="time-row">
+            <span class="sep">с</span><input type="text" name="unloading_from" class="time-input" placeholder="09:00" maxlength="5" required autocomplete="off">
+            <span class="sep">до</span><input type="text" name="unloading_to" class="time-input" placeholder="18:00" maxlength="5" required autocomplete="off">
+            <span class="divider"></span>
+            <span class="lunch-label">обед</span><input type="text" name="unloading_lunch_from" class="time-input" placeholder="13:00" maxlength="5" autocomplete="off">
+            <span class="sep">–</span><input type="text" name="unloading_lunch_to" class="time-input" placeholder="14:00" maxlength="5" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field c4"><label>Контактное лицо <span class="req">*</span></label><input type="text" name="unloading_contact" required autocomplete="off"><span class="error-msg">Укажите контакт</span></div>
+        <div class="field c4"><label>Телефон <span class="req">*</span></label><input type="tel" name="unloading_phone" class="phone-input" placeholder="+7 (___) ___-__-__" required autocomplete="off"><span class="error-msg">Укажите телефон</span></div>
+        <div class="field c4"><label>Способ <span class="req">*</span></label><select name="unloading_type" required><option value="">— выберите —</option><option>Верхняя</option><option>Боковая</option><option>Задняя</option><option>Не важно</option></select><span class="error-msg">Выберите способ</span></div>
+      </div>
+    </fieldset>
+
+    <div class="vat-operator">
+      <div class="vat-section">
+        <span class="lbl">Перевозка:</span>
+        <label><input type="radio" name="vat" value="С НДС"> С НДС</label>
+        <label><input type="radio" name="vat" value="Без НДС"> Без НДС</label>
+      </div>
+      <div class="operator-section">
+        <label>Оператор ИС ЭПД</label>
+        <input type="text" name="epd_operator" placeholder="Например: ООО «ЭПД Оператор»" autocomplete="off">
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>4. Счёт / документы</legend>
+      <div class="field c12"><label>Прикрепить файл</label><input type="file" name="attachment" multiple></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>5. Примечания</legend>
+      <div class="field c12"><label>Пропуск, доверенность, особые требования</label><textarea name="notes" placeholder="Например: пропуск за 2 дня, нужна доверенность..." autocomplete="off"></textarea></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>6. Государственный контракт</legend>
+      <div class="row">
+        <div class="field c7"><label>ГОЗ</label><input type="text" name="goz" placeholder="00-26/ЗК от 15 мая 2026 года" autocomplete="off"></div>
+        <div class="field c5"><label>ИГК</label><input type="text" name="igk" class="number-input" placeholder="2627101000042751700100000" maxlength="27" autocomplete="off"></div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="submit-btn" id="submitBtn">Отправить заявку</button>
+      <button type="button" class="reset-btn" onclick="resetForm()">Очистить</button>
+    </div>
+
+    <div class="success-message" id="successMessage">
+      <h3>✅ Заявка успешно отправлена!</h3>
+      <p>Письмо отправлено на 89526170163@ya.ru</p>
+    </div>
+    <div class="error-message-box" id="errorMessage">
+      <h3>❌ Ошибка отправки</h3>
+      <p>Произошла ошибка сети. Проверьте интернет и попробуйте ещё раз.</p>
+    </div>
+  </form>
+</div>
+
+<script>
+const DADATA_TOKEN = '7a4caf9f32fff7714b7842cfc14b65d1b3486270';
+const FORMSUBMIT_EMAIL = '89526170163@ya.ru';
+
+function getDateKey() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  return { ymd: `${y}${m}${d}`, key: `vtk_req_${y}${m}${d}` };
+}
+function peekNextRequestNumber() {
+  const { ymd, key } = getDateKey();
+  const counter = parseInt(localStorage.getItem(key) || '0', 10);
+  return `VTK-${ymd}-${String(counter + 1).padStart(2, '0')}`;
+}
+function claimRequestNumber() {
+  const { ymd, key } = getDateKey();
+  let counter = parseInt(localStorage.getItem(key) || '0', 10);
+  counter++;
+  localStorage.setItem(key, counter.toString());
+  return `VTK-${ymd}-${String(counter).padStart(2, '0')}`;
+}
+function formatDateRu(date) {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}.${m}.${y}`;
+}
+function formatTimeRu(date) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const m = String(date.getMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+function formatDateTimeRu(date) { return `${formatDateRu(date)} в ${formatTimeRu(date)}`; }
+function currentYearShort() { return String(new Date().getFullYear()).slice(-2); }
+
+document.getElementById('requestNumber').textContent = peekNextRequestNumber();
+document.getElementById('submitDateTime').textContent = formatDateTimeRu(new Date());
+
+function formatDateInput(input) {
+  let digits = input.value.replace(/\D/g, '');
+  if (!digits) { 
+    // Если поле пустое, подставляем текущую дату
+    const today = new Date();
+    input.value = formatDateRu(today);
+    return; 
+  }
+  let d, m, y;
+  if (digits.length <= 2) { 
+    d = digits.padStart(2, '0'); 
+    m = String(new Date().getMonth() + 1).padStart(2, '0'); 
+    y = currentYearShort(); 
+  }
+  else if (digits.length === 3) { 
+    d = digits.substring(0, 2); 
+    m = digits.substring(2, 3).padStart(2, '0'); 
+    y = currentYearShort(); 
+  }
+  else if (digits.length === 4) { 
+    d = digits.substring(0, 2); 
+    m = digits.substring(2, 4); 
+    y = currentYearShort(); 
+  }
+  else if (digits.length === 5) { 
+    d = digits.substring(0, 2); 
+    m = digits.substring(2, 4); 
+    y = digits.substring(4, 5).padStart(2, '0'); 
+  }
+  else { 
+    d = digits.substring(0, 2); 
+    m = digits.substring(2, 4); 
+    y = digits.substring(4, 6); 
+  }
+  let dayNum = parseInt(d, 10); let monNum = parseInt(m, 10); let yearNum = parseInt(y, 10);
+  if (dayNum > 31) dayNum = 31; if (dayNum < 1) dayNum = 1;
+  if (monNum > 12) monNum = 12; if (monNum < 1) monNum = 1;
+  if (yearNum > 99) yearNum = 99;
+  d = String(dayNum).padStart(2, '0'); m = String(monNum).padStart(2, '0'); y = String(yearNum).padStart(2, '0');
+  input.value = `${d}.${m}.${y}`;
+}
+
+function dateToFullYear(shortDate) {
+  if (!shortDate) return '';
+  const parts = shortDate.split('.');
+  if (parts.length !== 3) return shortDate;
+  let y = parseInt(parts[2], 10);
+  const fullYear = y < 50 ? 2000 + y : 1900 + y;
+  return `${parts[0]}.${parts[1]}.${fullYear}`;
+}
+
+document.querySelectorAll('.date-input').forEach(input => {
+  input.addEventListener('blur', () => formatDateInput(input));
+  input.addEventListener('change', () => formatDateInput(input));
+  input.addEventListener('input', (e) => { 
+    e.target.value = e.target.value.replace(/[^\d.]/g, ''); 
+  });
+});
+
+function formatTimeInput(input) {
+  let val = input.value.replace(/[^\d:]/g, '');
+  if (/^\d{1,2}$/.test(val)) { let h = parseInt(val, 10); if (h > 23) h = 23; val = String(h).padStart(2, '0') + ':00'; }
+  else if (/^\d{2}:$/.test(val)) { val = val + '00'; }
+  else if (/^\d{4}$/.test(val)) { val = val.substring(0, 2) + ':' + val.substring(2, 4); }
+  else if (/^\d{1,2}:\d{1,2}$/.test(val)) {
+    const parts = val.split(':');
+    let h = parseInt(parts[0], 10); let m = parseInt(parts[1], 10);
+    if (h > 23) h = 23; if (m > 59) m = 59;
+    val = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+  input.value = val;
+}
+
+document.querySelectorAll('.time-input').forEach(input => {
+  input.addEventListener('blur', () => formatTimeInput(input));
+  input.addEventListener('change', () => formatTimeInput(input));
+});
+
+// Инициализация Dadata для поиска по ИНН
+$(document).ready(function() {
+  function initInnSuggest(innInput) {
+    if (!DADATA_TOKEN) return;
+    const companyAttr = innInput.dataset.company;
+    const addressAttr = innInput.dataset.address;
+    const companyInput = companyAttr ? document.getElementById(companyAttr) : null;
+    const addressInput = addressAttr ? document.getElementById(addressAttr) : null;
+    
+    try {
+      $(innInput).suggestions({
+        token: DADATA_TOKEN,
+        type: 'PARTY',
+        count: 5,
+        onSelect: function(suggestion) {
+          if (!suggestion || !suggestion.data) return;
+          const d = suggestion.data;
+          if (companyInput) companyInput.value = (d.name && d.name.short_with_opf) || '';
+          if (addressInput) addressInput.value = (d.address && d.address.value) || '';
+          [companyInput, addressInput].forEach(el => el && el.classList.remove('error', 'blink-error'));
+          updateFormState();
+        }
+      });
+    } catch (err) { 
+      console.warn('Dadata не инициализирована:', err); 
+    }
+  }
+  
+  document.querySelectorAll('.inn-input').forEach(initInnSuggest);
+  
+  document.querySelectorAll('.inn-search-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.closest('.inn-wrapper').querySelector('input');
+      input.focus(); 
+      input.click();
+    });
+  });
+});
+
+// Обработка ввода в поля
+document.addEventListener('input', (e) => {
+  const input = e.target;
+  if (input.classList.contains('inn-input')) {
+    input.value = input.value.replace(/\D/g, '').slice(0, 12);
+  }
+  if (input.classList.contains('phone-input')) {
+    // Разрешаем вводить полный телефон
+    input.value = input.value.replace(/[^\d+\-() ]/g, '');
+  }
+  if (input.classList.contains('number-input')) {
+    input.value = input.value.replace(/[^\d,.]/g, '');
+  }
+});
+
+const form = document.getElementById('cargoForm');
+
+function isFieldFilled(el) {
+  if (el.type === 'radio') {
+    const group = form.querySelectorAll(`input[name="${el.name}"]`);
+    return Array.from(group).some(r => r.checked);
+  }
+  if (el.tagName === 'SELECT') return !!el.value;
+  const val = el.value.trim();
+  if (!val) return false;
+  if (el.classList.contains('inn-input')) return val.length === 10 || val.length === 12;
+  if (el.classList.contains('date-input')) return /^\d{2}\.\d{2}\.\d{2}$/.test(val);
+  if (el.classList.contains('time-input')) return /^\d{2}:\d{2}$/.test(val);
+  return true;
+}
+
+function updateFormState() {
+  const required = form.querySelectorAll('[required]');
+  const processedRadio = new Set();
+  let allFilled = true;
+  required.forEach(el => {
+    if (el.type === 'radio') {
+      if (processedRadio.has(el.name)) return;
+      processedRadio.add(el.name);
+    }
+    if (!isFieldFilled(el)) allFilled = false;
+  });
+  if (allFilled) { document.body.classList.remove('draft'); document.body.classList.add('ready'); }
+  else { document.body.classList.remove('ready'); document.body.classList.add('draft'); }
+}
+
+form.addEventListener('input', (e) => { updateFormState(); if (e.target && e.target.classList) e.target.classList.remove('error', 'blink-error'); });
+form.addEventListener('change', (e) => { updateFormState(); if (e.target && e.target.classList) e.target.classList.remove('error', 'blink-error'); });
+form.addEventListener('blur', (e) => { updateFormState(); }, true);
+updateFormState();
+
+// Отправка формы через fetch API
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  document.getElementById('successMessage').classList.remove('show');
+  document.getElementById('errorMessage').classList.remove('show');
+  
+  form.querySelectorAll('.error, .blink-error').forEach(el => el.classList.remove('error', 'blink-error'));
+  document.querySelectorAll('.date-input').forEach(formatDateInput);
+  document.querySelectorAll('.time-input').forEach(formatTimeInput);
+  
+  const required = form.querySelectorAll('[required]');
+  const processedRadio = new Set();
+  let firstInvalid = null;
+  let valid = true;
+  
+  required.forEach(el => {
+    let isEmpty = false;
+    if (el.type === 'radio') {
+      if (processedRadio.has(el.name)) return;
+      processedRadio.add(el.name);
+      const group = form.querySelectorAll(`input[name="${el.name}"]`);
+      if (!Array.from(group).some(r => r.checked)) {
+        isEmpty = true;
+        group.forEach(r => { const rg = r.closest('.vat-operator'); if (rg) rg.classList.add('error'); });
+      }
+    } else if (el.tagName === 'SELECT') { isEmpty = !el.value; }
+    else {
+      const val = el.value.trim();
+      if (!val) isEmpty = true;
+      if (el.classList.contains('inn-input') && val && val.length !== 10 && val.length !== 12) isEmpty = true;
+      if (el.classList.contains('date-input') && val && !/^\d{2}\.\d{2}\.\d{2}$/.test(val)) isEmpty = true;
+      if (el.classList.contains('time-input') && val && !/^\d{2}:\d{2}$/.test(val)) isEmpty = true;
+    }
+    if (isEmpty) {
+      valid = false;
+      if (el.type !== 'radio') el.classList.add('error');
+      if (!firstInvalid) firstInvalid = el;
+    }
+  });
+  
+  if (!valid) {
+    if (firstInvalid) {
+      const parentDetails = firstInvalid.closest('details');
+      if (parentDetails && !parentDetails.open) parentDetails.open = true;
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        firstInvalid.focus();
+        firstInvalid.classList.add('blink-error');
+        setTimeout(() => { firstInvalid.classList.remove('blink-error'); }, 1400);
+      }, 450);
+    }
+    return;
+  }
+  
+  const dateInput = form.querySelector('.date-input[name="cargo_ready_date"]');
+  if (dateInput && dateInput.value) dateInput.value = dateToFullYear(dateInput.value);
+  
+  const now = new Date();
+  const finalNumber = claimRequestNumber();
+  const finalDate = formatDateRu(now);
+  const finalTime = formatTimeRu(now);
+  
+  document.getElementById('requestNumber').textContent = finalNumber;
+  document.getElementById('submitDateTime').textContent = `${finalDate} в ${finalTime}`;
+  document.getElementById('request_number_hidden').value = finalNumber;
+  document.getElementById('submit_date_hidden').value = finalDate;
+  document.getElementById('submit_time_hidden').value = finalTime;
+  
+  const formData = new FormData(form);
+  formData.append('_subject', 'Новая заявка на подбор транспорта');
+  formData.append('_captcha', 'false');
+  formData.append('_template', 'table');
+  
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка...';
+  
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success === 'true' || response.ok) {
+      document.getElementById('successMessage').classList.add('show');
+      form.reset();
+      document.querySelectorAll('details').forEach(d => d.open = false);
+      document.getElementById('requestNumber').textContent = peekNextRequestNumber();
+      document.getElementById('submitDateTime').textContent = formatDateTimeRu(new Date());
+      updateFormState();
+      document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      throw new Error('FormSubmit вернул ошибку');
+    }
+  } catch (error) {
+    console.error('Ошибка отправки:', error);
+    document.getElementById('errorMessage').classList.add('show');
+    document.getElementById('errorMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Отправить заявку';
+  }
+});
+
+function resetForm() {
+  form.reset();
+  form.querySelectorAll('.error, .blink-error').forEach(el => el.classList.remove('error', 'blink-error'));
+  document.querySelectorAll('details').forEach(d => d.open = false);
+  document.getElementById('requestNumber').textContent = peekNextRequestNumber();
+  document.getElementById('submitDateTime').textContent = formatDateTimeRu(new Date());
+  document.getElementById('successMessage').classList.remove('show');
+  document.getElementById('errorMessage').classList.remove('show');
+  updateFormState();
+}
+</script>
+</body>
+</html>
