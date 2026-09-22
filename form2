@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Заявка на подбор транспорта — ВТК Восток</title>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.11.1/css/suggestions.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.11.1/js/jquery.suggestions.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 12px; color: #222; background: #f5f7fa; }
+.wrap { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.1); padding: 20px; }
+h1 { font-size: 24px; color: #111; margin: 0 0 15px; }
+fieldset { border: 1px solid #d0d7e0; background: #fafbfc; border-radius: 6px; padding: 15px; margin: 0 0 15px; }
+legend { font-weight: 600; color: #0b4f8a; padding: 0 5px; }
+.row { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; margin-bottom: 10px; }
+.field { display: flex; flex-direction: column; }
+.c4 { grid-column: span 4; }
+.c6 { grid-column: span 6; }
+.c12 { grid-column: span 12; }
+label { font-size: 12px; margin-bottom: 5px; color: #555; font-weight: 500; }
+.req { color: #d9534f; }
+input[type="text"], input[type="tel"], input[type="file"], select, textarea { 
+  padding: 8px 12px; border: 1px solid #d0d7e0; border-radius: 4px; 
+  font-size: 13px; width: 100%; background: #fff;
+}
+textarea { min-height: 60px; resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #0b4f8a; box-shadow: 0 0 0 3px rgba(11,79,138,.1); }
+.inn-wrapper { position: relative; }
+.inn-wrapper input { padding-right: 40px; }
+.inn-search-btn { 
+  position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+  background: #f0f4f8; border: 1px solid #d0d7e0; border-radius: 4px;
+  cursor: pointer; padding: 5px 10px; font-size: 16px;
+}
+.inn-search-btn:hover { background: #e1e8ed; }
+.agents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+.agent-card { background: #fff; border: 1px solid #e4e8ee; border-radius: 6px; padding: 15px; }
+.agent-card h4 { margin: 0 0 12px; font-size: 14px; color: #0b4f8a; border-bottom: 1px solid #eef1f5; padding-bottom: 8px; }
+.cargo-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.submit-btn { 
+  background: #0b4f8a; color: #fff; padding: 12px 30px; border: none; 
+  border-radius: 5px; font-size: 15px; font-weight: 600; cursor: pointer; 
+}
+.submit-btn:hover { background: #083a68; }
+.submit-btn:disabled { background: #999; cursor: not-allowed; }
+.reset-btn { 
+  background: #e6ebf1; color: #333; padding: 12px 30px; border: none; 
+  border-radius: 5px; font-size: 15px; cursor: pointer; margin-left: 10px;
+}
+.success-msg { 
+  display: none; background: #d4edda; border: 1px solid #c3e6cb; 
+  border-radius: 6px; padding: 20px; margin-top: 20px; text-align: center; 
+}
+.success-msg.show { display: block; }
+.error-msg { 
+  display: none; background: #f8d7da; border: 1px solid #f5c6cb; 
+  border-radius: 6px; padding: 20px; margin-top: 20px; text-align: center; 
+}
+.error-msg.show { display: block; }
+@media (max-width: 768px) {
+  .agents-grid { grid-template-columns: 1fr; }
+  .cargo-grid { grid-template-columns: repeat(3, 1fr); }
+  .row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Заявка на подбор транспорта</h1>
+  
+  <form id="cargoForm">
+    <input type="hidden" name="_subject" value="Новая заявка (форма 2)">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="text" name="_honey" style="display:none">
+    
+    <div class="row" style="margin-bottom: 20px;">
+      <div class="field c6">
+        <label>Заявку подал(а) <span class="req">*</span></label>
+        <input type="text" name="submitted_by" required placeholder="Фамилия Имя">
+      </div>
+    </div>
+
+    <details style="margin-bottom: 20px;">
+      <summary style="cursor: pointer; font-weight: 600; color: #0b4f8a; padding: 10px; background: #fafbfc; border-radius: 6px;">
+        Грузоотправитель / Грузополучатель / ЛОП (заполнять если не ВТК-Восток)
+      </summary>
+      <div class="agents-grid" style="padding: 15px;">
+        <div class="agent-card">
+          <h4>Грузоотправитель</h4>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>ИНН</label>
+            <div class="inn-wrapper">
+              <input type="text" class="inn-input" data-company="sender_company" data-address="sender_address" placeholder="10 или 12 цифр" maxlength="12">
+              <button type="button" class="inn-search-btn">🔍</button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Наименование</label>
+            <input type="text" id="sender_company">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Адрес</label>
+            <input type="text" id="sender_address">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Контакт</label>
+            <input type="text" name="sender_contact">
+          </div>
+          <div class="field">
+            <label>Телефон</label>
+            <input type="tel" name="sender_phone" class="phone-input" placeholder="+7 (999) 123-45-67">
+          </div>
+        </div>
+        
+        <div class="agent-card">
+          <h4>Грузополучатель</h4>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>ИНН</label>
+            <div class="inn-wrapper">
+              <input type="text" class="inn-input" data-company="receiver_company" data-address="receiver_address" placeholder="10 или 12 цифр" maxlength="12">
+              <button type="button" class="inn-search-btn">🔍</button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Наименование</label>
+            <input type="text" id="receiver_company">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Адрес</label>
+            <input type="text" id="receiver_address">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Контакт</label>
+            <input type="text" name="receiver_contact">
+          </div>
+          <div class="field">
+            <label>Телефон</label>
+            <input type="tel" name="receiver_phone" class="phone-input" placeholder="+7 (999) 123-45-67">
+          </div>
+        </div>
+        
+        <div class="agent-card">
+          <h4>ЛОП</h4>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>ИНН</label>
+            <div class="inn-wrapper">
+              <input type="text" class="inn-input" data-company="lop_company" data-address="lop_address" placeholder="10 или 12 цифр" maxlength="12">
+              <button type="button" class="inn-search-btn">🔍</button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Наименование</label>
+            <input type="text" id="lop_company">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Адрес</label>
+            <input type="text" id="lop_address">
+          </div>
+          <div class="field" style="margin-bottom: 10px;">
+            <label>Контакт</label>
+            <input type="text" name="lop_contact">
+          </div>
+          <div class="field">
+            <label>Телефон</label>
+            <input type="tel" name="lop_phone" class="phone-input" placeholder="+7 (999) 123-45-67">
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <fieldset>
+      <legend>1. Груз</legend>
+      <div class="row">
+        <div class="field c6">
+          <label>Наименование <span class="req">*</span></label>
+          <textarea name="cargo_name" required></textarea>
+        </div>
+        <div class="field c6">
+          <label>Упаковка <span class="req">*</span></label>
+          <textarea name="cargo_package" required></textarea>
+        </div>
+      </div>
+      <div class="cargo-grid">
+        <div class="field"><label>Д, м <span class="req">*</span></label><input type="text" name="cargo_length" class="num-input" required></div>
+        <div class="field"><label>Ш, м <span class="req">*</span></label><input type="text" name="cargo_width" class="num-input" required></div>
+        <div class="field"><label>В, м <span class="req">*</span></label><input type="text" name="cargo_height" class="num-input" required></div>
+        <div class="field"><label>Вес, кг <span class="req">*</span></label><input type="text" name="cargo_weight" class="num-input" required></div>
+        <div class="field"><label>Объём, м³ <span class="req">*</span></label><input type="text" name="cargo_volume" class="num-input" required></div>
+        <div class="field"><label>Мест <span class="req">*</span></label><input type="text" name="cargo_places" class="num-input" required></div>
+        <div class="field"><label>Готов <span class="req">*</span></label><input type="text" name="cargo_date" class="date-input" placeholder="ДД.ММ.ГГ" maxlength="8" required></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. Погрузка</legend>
+      <div class="row">
+        <div class="field c6">
+          <label>Адрес <span class="req">*</span></label>
+          <textarea name="load_address" required></textarea>
+        </div>
+        <div class="field c6">
+          <label>Время <span class="req">*</span></label>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <span>с</span>
+            <input type="text" name="load_from" class="time-input" placeholder="09:00" maxlength="5" required>
+            <span>до</span>
+            <input type="text" name="load_to" class="time-input" placeholder="18:00" maxlength="5" required>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field c4">
+          <label>Контакт <span class="req">*</span></label>
+          <input type="text" name="load_contact" required>
+        </div>
+        <div class="field c4">
+          <label>Телефон <span class="req">*</span></label>
+          <input type="tel" name="load_phone" class="phone-input" placeholder="+7 (999) 123-45-67" required>
+        </div>
+        <div class="field c4">
+          <label>Способ <span class="req">*</span></label>
+          <select name="load_type" required>
+            <option value="">Выберите</option>
+            <option>Верхняя</option>
+            <option>Боковая</option>
+            <option>Задняя</option>
+            <option>Не важно</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3. Разгрузка</legend>
+      <div class="row">
+        <div class="field c6">
+          <label>Адрес <span class="req">*</span></label>
+          <textarea name="unload_address" required></textarea>
+        </div>
+        <div class="field c6">
+          <label>Время <span class="req">*</span></label>
+          <div style="display: flex; gap: 5px; align-items: center;">
+            <span>с</span>
+            <input type="text" name="unload_from" class="time-input" placeholder="09:00" maxlength="5" required>
+            <span>до</span>
+            <input type="text" name="unload_to" class="time-input" placeholder="18:00" maxlength="5" required>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field c4">
+          <label>Контакт <span class="req">*</span></label>
+          <input type="text" name="unload_contact" required>
+        </div>
+        <div class="field c4">
+          <label>Телефон <span class="req">*</span></label>
+          <input type="tel" name="unload_phone" class="phone-input" placeholder="+7 (999) 123-45-67" required>
+        </div>
+        <div class="field c4">
+          <label>Способ <span class="req">*</span></label>
+          <select name="unload_type" required>
+            <option value="">Выберите</option>
+            <option>Верхняя</option>
+            <option>Боковая</option>
+            <option>Задняя</option>
+            <option>Не важно</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="row" style="margin-bottom: 15px;">
+      <div class="field c6">
+        <label>Перевозка <span class="req">*</span></label>
+        <div style="display: flex; gap: 15px; margin-top: 5px;">
+          <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;"><input type="radio" name="vat" value="С НДС" required> С НДС</label>
+          <label style="display: flex; align-items: center; gap: 5px; font-weight: normal;"><input type="radio" name="vat" value="Без НДС"> Без НДС</label>
+        </div>
+      </div>
+      <div class="field c6">
+        <label>Оператор ЭПД</label>
+        <input type="text" name="epd_operator">
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Примечания</legend>
+      <div class="field c12">
+        <textarea name="notes" placeholder="Пропуск, доверенность и т.д."></textarea>
+      </div>
+    </fieldset>
+
+    <div style="display: flex; gap: 10px;">
+      <button type="submit" class="submit-btn">Отправить заявку</button>
+      <button type="button" class="reset-btn" onclick="resetForm()">Очистить</button>
+    </div>
+
+    <div class="success-msg" id="successMsg">
+      <h3>✅ Заявка отправлена!</h3>
+      <p>Письмо отправлено на 89526170163@ya.ru</p>
+    </div>
+    <div class="error-msg" id="errorMsg">
+      <h3>❌ Ошибка отправки</h3>
+      <p>Проверьте интернет и попробуйте ещё раз</p>
+    </div>
+  </form>
+</div>
+
+<script>
+const DADATA_TOKEN = '7a4caf9f32fff7714b7842cfc14b65d1b3486270';
+const EMAIL = '89526170163@ya.ru';
+
+// Инициализация Dadata
+$(document).ready(function() {
+  $('.inn-input').each(function() {
+    const $this = $(this);
+    const companyField = $('#' + $this.data('company'));
+    const addressField = $('#' + $this.data('address'));
+    
+    $this.suggestions({
+      token: DADATA_TOKEN,
+      type: 'PARTY',
+      count: 5,
+      onSelect: function(suggestion) {
+        if (suggestion.data) {
+          companyField.val(suggestion.data.name.short_with_opf || '');
+          addressField.val(suggestion.data.address.value || '');
+        }
+      }
+    });
+    
+    $this.next('.inn-search-btn').click(function() {
+      $this.focus();
+    });
+  });
+});
+
+// Форматирование телефона
+$(document).on('input', '.phone-input', function() {
+  let val = this.value.replace(/\D/g, '');
+  if (val.startsWith('7')) val = val.slice(1);
+  if (val.startsWith('8')) val = val.slice(1);
+  
+  let formatted = '+7';
+  if (val.length > 0) formatted += ' (' + val.substring(0, 3);
+  if (val.length >= 3) formatted += ') ' + val.substring(3, 6);
+  if (val.length >= 6) formatted += '-' + val.substring(6, 8);
+  if (val.length >= 8) formatted += '-' + val.substring(8, 10);
+  
+  this.value = formatted;
+});
+
+// Форматирование даты
+$(document).on('input', '.date-input', function() {
+  let val = this.value.replace(/\D/g, '');
+  if (val.length >= 2) val = val.substring(0, 2) + '.' + val.substring(2, 4) + '.' + val.substring(4, 6);
+  if (!val && this.value === '') {
+    const today = new Date();
+    val = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + String(today.getFullYear()).slice(-2);
+  }
+  this.value = val;
+});
+
+// Форматирование времени
+$(document).on('input', '.time-input', function() {
+  let val = this.value.replace(/[^\d:]/g, '');
+  if (/^\d{2}$/.test(val)) val = val + ':00';
+  if (/^\d{4}$/.test(val)) val = val.substring(0, 2) + ':' + val.substring(2, 4);
+  this.value = val;
+});
+
+// Только числа
+$(document).on('input', '.num-input', function() {
+  this.value = this.value.replace(/[^\d,.]/g, '');
+});
+
+// Отправка формы
+$('#cargoForm').submit(function(e) {
+  e.preventDefault();
+  
+  $('#successMsg, #errorMsg').removeClass('show');
+  
+  const formData = new FormData(this);
+  formData.append('_subject', 'Новая заявка (форма 2)');
+  formData.append('_captcha', 'false');
+  
+  const btn = $('.submit-btn');
+  btn.prop('disabled', true).text('Отправка...');
+  
+  fetch('https://formsubmit.co/ajax/' + EMAIL, {
+    method: 'POST',
+    headers: { 'Accept': 'application/json' },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    $('#successMsg').addClass('show');
+    this.reset();
+    $('#successMsg')[0].scrollIntoView({ behavior: 'smooth' });
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    $('#errorMsg').addClass('show');
+    $('#errorMsg')[0].scrollIntoView({ behavior: 'smooth' });
+  })
+  .finally(() => {
+    btn.prop('disabled', false).text('Отправить заявку');
+  });
+});
+
+function resetForm() {
+  $('#cargoForm')[0].reset();
+  $('#successMsg, #errorMsg').removeClass('show');
+}
+</script>
+
+</body>
+</html>
